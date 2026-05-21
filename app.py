@@ -41,7 +41,7 @@ init_db()
 def index():
     return render_template('index.html')
 
-# МАРШРУТ ДЛЯ СТОРІНКИ ПОСЛУГ (Твоє нове красиве меню з кнопками)
+# МАРШРУТ ДЛЯ СТОРІНКИ ПОСЛУГ
 @app.route('/services')
 def services():
     if 'user_id' not in session:
@@ -55,7 +55,7 @@ def test():
         return redirect(url_for('login'))
     return render_template('test.html')
 
-# ЗБЕРЕЖЕННЯ РЕЗУЛЬТАТУ ТЕСТУ (Викликається твоїм JavaScript у test.html)
+# ЗБЕРЕЖЕННЯ РЕЗУЛЬТАТУ ТЕСТУ
 @app.route('/save_test_result', methods=['POST'])
 def save_test_result():
     if 'user_id' not in session:
@@ -69,7 +69,7 @@ def save_test_result():
     conn.close()
     return "Успішно збережено!"
 
-# МАРШРУТ ДЛЯ БОЙЛЕРУ
+# МАРШРУТ ДЛЯ БОЙЛЕРУ (ПРАВИЛЬНИЙ НАЗВА ФАЙЛУ БЕЗ TEMPLATES/)
 @app.route('/boiler', methods=['GET', 'POST'])
 def boiler():
     if 'user_id' not in session:
@@ -84,7 +84,6 @@ def boiler():
         total_cost = cost_per_day * days
         service_title = f"Котел {boiler_type.upper()} ({days} дн.)"
         
-        # Переформатуємо дату для красивого відображення
         try:
             dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
             formatted_date = dt.strftime("%d.%m.%Y %H:%M")
@@ -110,7 +109,7 @@ def boiler():
             
     return render_template('boiler.html')
 
-# МАРШРУТ ДЛЯ ПРОВІДНИКА (ГІДА)
+# МАРШРУТ ДЛЯ ПРОВІДНИКА (ПРАВИЛЬНИЙ НАЗВА ФАЙЛУ БЕЗ TEMPLATES/)
 @app.route('/guide', methods=['GET', 'POST'])
 def guide():
     if 'user_id' not in session:
@@ -150,11 +149,11 @@ def guide():
             
     return render_template('guide.html')
 
-# МАРШРУТ АДМІНКИ БОГА
+# МАРШРУТ АДМІНКИ
 @app.route('/admin')
 def admin():
     if 'user_id' not in session or not session.get('admin'):
-        return "Доступ заборонено! Тільки для Творця.", 403
+        return "Доступ заборонено!", 403
         
     conn = get_connection()
     c = conn.cursor()
@@ -165,14 +164,11 @@ def admin():
     for u in users:
         c.execute("SELECT id, name, used, booking_date FROM services WHERE user_id=?", (u[0],))
         srv = c.fetchall()
-        users_data.append({
-            'info': u,
-            'services': srv
-        })
+        users_data.append({'info': u, 'services': srv})
     conn.close()
     return render_template('admin.html', users_data=users_data)
 
-# АВТОРИЗАЦІЯ, РЕЄСТРАЦІЯ, ПРОФІЛЬ
+# РЕЄСТРАЦІЯ ТА ВХІД
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
