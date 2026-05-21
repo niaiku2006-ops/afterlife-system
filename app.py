@@ -6,8 +6,11 @@ from flask import Flask, render_template, request, redirect, session, url_for
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
+# Використовуємо єдине підключення в пам'яті для Vercel, щоб не виникало помилок запису файлів
+_SHARED_CONN = sqlite3.connect(":memory:", check_same_thread=False)
+
 def get_connection():
-    return sqlite3.connect("/tmp/users.db")
+    return _SHARED_CONN
 
 def init_db():
     conn = get_connection()
@@ -32,8 +35,12 @@ def init_db():
             booking_date TEXT
         )
     ''')
+    # Створюємо тестового користувача автоматично, щоб завжди можна було увійти
+    try:
+        c.execute("INSERT INTO users (username, password, nickname, avatar, souls) VALUES ('Admin', 'admin123', 'Адміністратор', 'default.png', 500)")
+    except sqlite3.IntegrityError:
+        pass
     conn.commit()
-    conn.close()
 
 init_db()
 
@@ -66,10 +73,9 @@ def save_test_result():
     c = conn.cursor()
     c.execute("UPDATE users SET last_result=? WHERE id=?", (result_text, session['user_id']))
     conn.commit()
-    conn.close()
     return "Успішно збережено!"
 
-# МАРШРУТ ДЛЯ БОЙЛЕРУ (ПРАВИЛЬНИЙ НАЗВА ФАЙЛУ БЕЗ TEMPLATES/)
+# МАРШРУТ ДЛЯ БОЙЛЕРУ
 @app.route('/boiler', methods=['GET', 'POST'])
 def boiler():
     if 'user_id' not in session:
@@ -101,15 +107,13 @@ def boiler():
             c.execute("INSERT INTO services (user_id, name, booking_date) VALUES (?, ?, ?)",
                       (session['user_id'], service_title, formatted_date))
             conn.commit()
-            conn.close()
             return render_template('success_service.html', service_name=service_title)
         else:
-            conn.close()
             return "У вас недостатньо душ для оренди цього котла! 💀"
             
     return render_template('boiler.html')
 
-# МАРШРУТ ДЛЯ ПРОВІДНИКА (ПРАВИЛЬНИЙ НАЗВА ФАЙЛУ БЕЗ TEMPLATES/)
+# МАРШРУТ ДЛЯ ПРОВІДНИКА
 @app.route('/guide', methods=['GET', 'POST'])
 def guide():
     if 'user_id' not in session:
@@ -122,7 +126,7 @@ def guide():
         
         cost_per_hour = 20 if guide_type == 'basic' else 40
         total_cost = cost_per_hour * hours
-        service_title = f"Провідник {guide_type.upper()} ({hours} год.)"
+        service_title = f"Провідник {guide_type.upper()} ({hours} god.)"
         
         try:
             dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
@@ -141,10 +145,8 @@ def guide():
             c.execute("INSERT INTO services (user_id, name, booking_date) VALUES (?, ?, ?)",
                       (session['user_id'], service_title, formatted_date))
             conn.commit()
-            conn.close()
             return render_template('success_service.html', service_name=service_title)
         else:
-            conn.close()
             return "У вас недостатньо душ для найму провідника! 💀"
             
     return render_template('guide.html')
@@ -165,7 +167,6 @@ def admin():
         c.execute("SELECT id, name, used, booking_date FROM services WHERE user_id=?", (u[0],))
         srv = c.fetchall()
         users_data.append({'info': u, 'services': srv})
-    conn.close()
     return render_template('admin.html', users_data=users_data)
 
 # РЕЄСТРАЦІЯ ТА ВХІД
@@ -185,8 +186,6 @@ def register():
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
             return "Користувач з таким логіном вже існує в Книзі Доль!"
-        finally:
-            conn.close()
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -199,7 +198,6 @@ def login():
         c = conn.cursor()
         c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
         user = c.fetchone()
-        conn.close()
         
         if user:
             session['user_id'] = user[0]
@@ -230,7 +228,6 @@ def profile():
     
     c.execute("SELECT * FROM services WHERE user_id=?", (session['user_id'],))
     user_services = c.fetchall()
-    conn.close()
     
     return render_template('profile.html', user=user, services=user_services)
 
