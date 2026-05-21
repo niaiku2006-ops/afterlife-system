@@ -1,85 +1,150 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Провідник Потойбіччя</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
-        }
-        .nav {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-        .nav a {
-            color: #bb86fc;
-            text-decoration: none;
-            margin: 0 15px;
-            font-size: 18px;
-        }
-        .nav a:hover {
-            text-decoration: underline;
-        }
-        .content {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #1e1e1e;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.7);
-            border: 1px solid #2d2d2d;
-        }
-        h1 {
-            color: #cf6679;
-            text-align: center;
-        }
-        h2 {
-            color: #03dac6;
-            border-bottom: 1px solid #333;
-            padding-bottom: 10px;
-            margin-top: 30px;
-        }
-        ul {
-            line-height: 1.6;
-        }
-        li {
-            margin-bottom: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Пошук провідника</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#0b0b0b;
+    color:#e0e0e0;
+}
+
+header{
+    background:#111;
+    padding:20px;
+    text-align:center;
+    border-bottom:1px solid #444;
+}
+
+h1{
+    margin:0;
+    color:#b3a1ff;
+}
+
+nav{
+    text-align:center;
+    padding:10px;
+    background:#151515;
+}
+
+nav a{
+    color:#ffffff;
+    margin:0 15px;
+    text-decoration:none;
+}
+
+nav a:hover{
+    color:#b3a1ff;
+}
+
+main{
+    padding:30px 20px;
+}
+
+.box{
+    background:#1a1a1a;
+    max-width:600px;
+    margin:0 auto;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 0 15px rgba(179,161,255,0.1);
+}
+
+h2{
+    color:#b3a1ff;
+    margin-top:0;
+}
+
+form{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    margin-top:20px;
+}
+
+label{
+    font-weight:bold;
+    color:#ccc;
+}
+
+select, input{
+    padding:12px;
+    background:#111;
+    border:1px solid #333;
+    color:white;
+    border-radius:6px;
+    font-size:15px;
+}
+
+select:focus, input:focus{
+    border-color:#b3a1ff;
+    outline:none;
+}
+
+button{
+    padding:14px;
+    background:#b3a1ff;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:bold;
+    transition:background 0.2s;
+    margin-top:10px;
+}
+
+button:hover{
+    background:#9a87ff;
+}
+
+.desc{
+    color:#aaa;
+    font-size:14px;
+    line-height:1.5;
+}
+</style>
 </head>
 <body>
 
-    <div class="nav">
-        <a href="/">Головна</a>
-        <a href="/services">Магазин послуг</a>
-        <a href="/profile">Профіль</a>
+<header>
+    <h1>Пошук провідника</h1>
+</header>
+
+<nav>
+    <a href="/">Про нас</a>
+    <a href="/services">Послуги</a>
+    <a href="/profile">Профіль</a>
+</nav>
+
+<main>
+    <div class="box">
+        <h2>Оформлення послуги</h2>
+        <p>Оберіть тип провідника, кількість годин супроводу та час.</p>
+
+        <form method="POST">
+            <label for="guide_type">Тип провідника</label>
+            <select name="guide_type" id="guide_type" required>
+                <option value="basic">Basic — 20 душ за 1 годину</option>
+                <option value="premium">Premium — 40 душ за 1 годину</option>
+            </select>
+
+            <label for="hours">Кількість годин</label>
+            <input type="number" name="hours" id="hours" min="1" value="1" required>
+
+            <label for="booking_time">Дата та час початку супроводу</label>
+            <input type="datetime-local" name="booking_time" id="booking_time" required>
+
+            <p class="desc">Вартість розраховується автоматично. Провідник зустріне вас у призначений час одразу після проходження митного контролю душ.</p>
+
+            <button type="submit">Найняти провідника</button>
+        </form>
     </div>
-
-    <div class="content">
-        <h1>📜 Книга Провідника по Потойбіччю</h1>
-        <p>Вітаємо у цифровій системі розподілу душ! Якщо ви опинилися тут, ваше земне існування завершено, і настав час визначити вашу подальшу долю.</p>
-
-        <h2>1. Як нараховуються душі?</h2>
-        <p>При першій реєстрації кожен грішник автоматично отримує стартовий капітал у розмірі <b>100 душ</b>. Душі — це головна валюта нашої системи. Ними можна розплачуватися в магазині послуг або отримувати їх від Верховної Адміністрації (Бога чи Адміна) за хорошу поведінку.</p>
-
-        <h2>2. Проходження тесту на гріхи</h2>
-        <ul>
-            <li>Перейдіть у вкладку "Профіль" та запустіть тест.</li>
-            <li>Відповідайте чесно. Ваші відповіді аналізуються системою автоматично.</li>
-            <li>Якщо ви наберете занадто багато балів грішності, система винесе вердикт: <b>Пекло</b>. Якщо мало — <b>Рай</b>.</li>
-        </ul>
-
-        <h2>3. Бронювання котлів та індульгенцій</h2>
-        <p>Якщо ваш вердикт невтішний, не панікуйте! У розділі "Магазин послуг" ви можете орендувати комфортабельний VIP-котел, де смола замінена на мінеральну воду, або купити індульгенцію, що полегшить вашу долю.</p>
-
-        <h2>4. Важливе попередження</h2>
-        <p>Адміністрація Потойбіччя (Бог) уважно стежить за кожним через панель керування. Спроби зламати лічильник душ караються додатковими колами чисток!</p>
-    </div>
+</main>
 
 </body>
 </html>
