@@ -3,58 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Послуги</title>
-
+    <title>Послуги Потойбіччя</title>
     <style>
-        body { margin:0; font-family:Arial,sans-serif; background:#0b0b0b; color:#e0e0e0; }
-        header { background:#111; padding:20px; text-align:center; border-bottom:1px solid #444; }
-        h1 { margin:0; color:#b3a1ff; }
-        nav { text-align:center; padding:10px; background:#151515; }
-        nav a { color:#ccc; margin:0 15px; text-decoration:none; }
-        nav a:hover { color:#b3a1ff; }
-        main { padding:20px; text-align:center; }
-        .card { background:#1a1a1a; margin:15px auto; padding:20px; max-width:400px; border-radius:10px; box-shadow:0 0 10px rgba(179,161,255,0.2); }
-        button { padding:10px 20px; background:#b3a1ff; border:none; border-radius:5px; cursor:pointer; color:white; }
-        button:hover { background:#9a87ff; }
-        footer { text-align:center; padding:10px; background:#111; border-top:1px solid #444; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .nav {
+            margin-bottom: 30px;
+        }
+        .nav a {
+            color: #bb86fc;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+        .nav a:hover {
+            text-decoration: underline;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #2d2d2d;
+            border: 2px solid #3d3d3d;
+            border-radius: 10px;
+            padding: 20px;
+            width: 280px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: #bb86fc;
+        }
+        .card h3 {
+            color: #cf6679;
+            margin-top: 0;
+        }
+        .price {
+            font-size: 20px;
+            color: #03dac6;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+        button {
+            background-color: #bb86fc;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #9965f4;
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Наші послуги</h1>
-</header>
-
-<nav>
-    <a href="/">Про нас</a>
-    <a href="/services">Послуги</a>
-    <a href="/profile">Профіль</a>
-</nav>
-
-<main>
-    <div class="card">
-        <h3>Тест для проходження у рай</h3>
-        <p>Пройдіть перевірку та дізнайтесь свою долю</p>
-        <p>Ціна: 10 душ</p>
-        <button onclick="location.href='/start_test'">Почати спробу</button>
+    <div class="nav">
+        <a href="/">Головна</a>
+        <a href="/guide">Провідник</a>
+        <a href="/profile">Профіль</a>
     </div>
 
-    <div class="card">
-        <h3>Пошук провідника</h3>
-        <p>Знайдіть наставника для адаптації</p>
-        <button onclick="location.href='/guide'">Замовити</button>
-    </div>
+    <h1>Магазин Послуг та Індульгенцій</h1>
+    <p>Витрачайте свої зароблені душі на покращення умов перебування в потойбічному світі.</p>
 
-    <div class="card">
-        <h3>Бронювання котла</h3>
-        <p>Забронюйте місце заздалегідь</p>
-        <button onclick="location.href='/boiler'">Забронювати</button>
-    </div>
-</main>
+    <div class="container">
+        <div class="card">
+            <h3>VIP Котел з гідромасажем</h3>
+            <p>Замість киплячої смоли — приємна тепла мінеральна вода. Комфортне відбування покарання.</p>
+            <div class="price">50 душ</div>
+            <form action="/book_service" method="POST">
+                <input type="hidden" name="service_name" value="VIP Котел з гідромасажем">
+                <input type="hidden" name="cost" value="50">
+                <button type="submit">Замовити котел</button>
+            </form>
+        </div>
 
-<footer>
-    <p>© 2026 AfterLife System</p>
-</footer>
+        <div class="card">
+            <h3>Повна Індульгенція</h3>
+            <p>Миттєве списання дрібних та середніх гріхів прямо з Книги Доль.</p>
+            <div class="price">80 душ</div>
+            <form action="/book_service" method="POST">
+                <input type="hidden" name="service_name" value="Повна Індульгенція">
+                <input type="hidden" name="cost" value="80">
+                <button type="submit">Оформити</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Контрабандний перепустку в Рай</h3>
+            <p>Дозволяє тимчасово (або назавжди, якщо пощастить) зайти в Едемський сад без черги.</p>
+            <div class="price">150 душ</div>
+            <form action="/book_service" method="POST">
+                <input type="hidden" name="service_name" value="Контрабандний перепустку в Рай">
+                <input type="hidden" name="cost" value="150">
+                <button type="submit">Придбати</button>
+            </form>
+        </div>
+    </div>
 
 </body>
 </html>
