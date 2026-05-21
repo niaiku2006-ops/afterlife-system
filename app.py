@@ -13,6 +13,8 @@ def get_connection():
     """Повертає підключення, ГАРАНТОВАНО створюючи таблиці, якщо їх немає."""
     conn = _SHARED_CONN
     c = conn.cursor()
+    
+    # Створюємо таблиці при кожному виклику з'єднання (якщо їх немає)
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +35,8 @@ def get_connection():
             booking_date TEXT
         )
     ''')
-    # Створюємо користувачів один раз, якщо таблиця порожня
+    
+    # Автоматично додаємо тестових користувачів, якщо таблиця абсолютно порожня
     c.execute("SELECT COUNT(*) FROM users")
     if c.fetchone()[0] == 0:
         c.execute("INSERT OR IGNORE INTO users (id, username, password, nickname, avatar, souls) VALUES (1, 'Admin', 'admin123', 'Адміністратор', 'default.png', 500)")
@@ -159,7 +162,7 @@ def guide():
 @app.route('/admin')
 def admin():
     if 'user_id' not in session or not session.get('admin'):
-        return "Доступ заборонено!", 403
+        return "Доступ заборонено! Ви не маєте божественних прав. ❌", 403
         
     conn = get_connection()
     c = conn.cursor()
@@ -209,8 +212,11 @@ def login():
             session.clear()  # Очищуємо стару сесію перед входом нового користувача
             session['user_id'] = user[0]
             session['username'] = user[1]
-            if user[1] in ['God', 'Admin']:
+            
+            # Перетворюємо логін у нижній регістр, щоб адмінка працювала для God, god, Admin, admin
+            if user[1].lower() in ['god', 'admin']:
                 session['admin'] = True
+                
             return redirect(url_for('profile'))
         else:
             return "Невірний логін або пароль грішника! Спробуйте ще раз або зареєструйтесь."
