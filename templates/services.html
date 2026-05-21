@@ -6,79 +6,70 @@
     <title>Послуги - AfterLife System</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
             margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #0b0b0b;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        header {
+            background: #111;
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #b3a1ff;
+            font-size: 36px;
+        }
+
+        nav {
+            background: #151515;
+            padding: 12px;
             text-align: center;
         }
 
-        .header {
-            background-color: #1a1a1a;
-            padding: 40px 20px;
-            border-bottom: 1px solid #2d2d2d;
-        }
-
-        .header h1 {
-            color: #9965f4;
-            font-size: 36px;
-            margin: 0 0 10px 0;
-        }
-
-        .header p {
-            color: #aaaaaa;
-            font-size: 16px;
-            margin: 0 0 30px 0;
-        }
-
-        .nav {
-            border-top: 1px solid #333;
-            padding-top: 15px;
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-        }
-
-        .nav a {
+        nav a {
             color: #ffffff;
+            margin: 0 15px;
             text-decoration: none;
             font-size: 16px;
-            font-weight: normal;
             transition: color 0.2s;
         }
 
-        .nav a:hover {
-            color: #bb86fc;
+        nav a:hover {
+            color: #b3a1ff;
         }
 
-        .content-container {
-            max-width: 800px;
+        main {
+            max-width: 900px;
             margin: 40px auto;
-            padding: 0 20px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 25px;
         }
 
-        .service-card {
-            background-color: #1c1c1c;
-            border-radius: 12px;
-            padding: 30px;
+        .section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(179, 161, 255, 0.05);
             text-align: left;
         }
 
-        .service-card h2 {
-            color: #9965f4;
-            font-size: 22px;
+        .section h2 {
             margin-top: 0;
-            margin-bottom: 12px;
+            color: #b3a1ff;
+            font-size: 24px;
         }
 
-        .service-card p {
+        .section p {
             color: #cccccc;
             font-size: 15px;
-            line-height: 1.6;
             margin-bottom: 20px;
         }
 
@@ -86,65 +77,55 @@
             display: block;
             width: 100%;
             box-sizing: border-box;
-            background-color: #9965f4;
+            background: #b3a1ff;
             color: #ffffff;
             border: none;
             padding: 14px;
             font-size: 16px;
             font-weight: bold;
-            border-radius: 8px;
+            border-radius: 6px;
             cursor: pointer;
             text-decoration: none;
             text-align: center;
-            transition: background-color 0.2s, transform 0.1s;
+            transition: background 0.2s;
         }
 
         .action-btn:hover {
-            background-color: #b388ff;
-            transform: translateY(-1px);
-        }
-
-        form {
-            margin: 0;
-            padding: 0;
-            width: 100%;
+            background: #9a87ff;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>AfterLife System</h1>
-        <p>Система керування душею після життя</p>
-        
-        <div class="nav">
-            <a href="/">Про нас</a>
-            <a href="/services">Послуги</a>
-            <a href="/profile">Профіль</a>
-        </div>
+<header>
+    <h1>AfterLife System</h1>
+</header>
+
+<nav>
+    <a href="/">Про нас</a>
+    <a href="/services">Послуги</a>
+    <a href="/profile">Профіль</a>
+</nav>
+
+<main>
+    <div class="section">
+        <h2>Перевірка Духовного Стану</h2>
+        <p>Пройдіть наш фірмовий інтерактивний аналіз вашого земного життя. Автоматизована система миттєво порахує індекс грішності та видасть попередній вердикт для вашого майбутнього розподілу.</p>
+        <a href="/test" class="action-btn">Пройти тест долі</a>
     </div>
 
-    <div class="content-container">
-
-        <div class="service-card">
-            <h2>Перевірка Духовного Стану</h2>
-            <p>Запустіть автоматичний аналіз вашого земного життя. Система визначить ваш рівень грішності та видасть попередній вердикт для розподілу (Рай або Пекло).</p>
-            <a href="/test" class="action-btn">Пройти тест грішника</a>
-        </div>
-
-        <div class="service-card">
-            <h2>VIP Котел з гідромасажем</h2>
-            <p>Заміна стандартного киплячого котла на елітну модель з регулюванням температури смоли, гідромасажними форсунками та приємною фоновою музикою для комфортного відбування покарання.</p>
-            <a href="/boiler" class="action-btn">Перейти до замовлення Бойлера</a>
-        </div>
-
-        <div class="service-card">
-            <h2>Персональний Провідник</h2>
-            <p>Супровід від досвідченого демона або ангела-стажера, який допоможе уникнути черг на розподілі, детально пояснить місцеві правила та допоможе адаптуватися до умов вашого нового потойбічного перебування.</p>
-            <a href="/guide" class="action-btn">Перейти до Провідника (Гіда)</a>
-        </div>
-
+    <div class="section">
+        <h2>Оренда Комфортабельного Kотла</h2>
+        <p>Замініть стандартні пекельні умови на преміум-сегмент. На вибір доступні VIP-моделі котлів із налаштуванням температури кипіння смоли, вбудованим гідромасажем та приємною фоновою музикою.</p>
+        <a href="/boiler" class="action-btn">Перейти до бронювання котла</a>
     </div>
+
+    <div class="section">
+        <h2>Супровід Персонального Провідника</h2>
+        <p>Не бажаєте стояти в нескінченних чергах на реєстрації потойбіччя? Найміть досвідченого демона-консультанта або ангела-стажера. Вони проведуть вас закритими маршрутами та роз'яснять усі правила.</p>
+        <a href="/guide" class="action-btn">Перейти до вибору провідника</a>
+    </div>
+</main>
 
 </body>
 </html>
