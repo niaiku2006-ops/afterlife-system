@@ -6,106 +6,107 @@
 <title>Пошук провідника</title>
 
 <style>
-body{
-    margin:0;
-    font-family:Arial,sans-serif;
-    background:#0b0b0b;
-    color:#e0e0e0;
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #0b0b0b;
+    color: #e0e0e0;
 }
 
-header{
-    background:#111;
-    padding:20px;
-    text-align:center;
-    border-bottom:1px solid #444;
+header {
+    background: #111;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid #333;
 }
 
-h1{
-    margin:0;
-    color:#b3a1ff;
+h1 {
+    margin: 0;
+    color: #b3a1ff;
 }
 
-nav{
-    text-align:center;
-    padding:10px;
-    background:#151515;
+nav {
+    text-align: center;
+    padding: 10px;
+    background: #151515;
+    border-bottom: 1px solid #222;
 }
 
-nav a{
-    color:#ffffff;
-    margin:0 15px;
-    text-decoration:none;
+nav a {
+    color: #ffffff;
+    margin: 0 15px;
+    text-decoration: none;
 }
 
-nav a:hover{
-    color:#b3a1ff;
+nav a:hover {
+    color: #b3a1ff;
 }
 
-main{
-    padding:30px 20px;
+main {
+    padding: 30px 20px;
 }
 
-.box{
-    background:#1a1a1a;
-    max-width:600px;
-    margin:0 auto;
-    padding:25px;
-    border-radius:12px;
-    box-shadow:0 0 15px rgba(179,161,255,0.1);
+.box {
+    background: #1a1a1a;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(179, 161, 255, 0.1);
 }
 
-h2{
-    color:#b3a1ff;
-    margin-top:0;
+h2 {
+    color: #b3a1ff;
+    margin-top: 0;
 }
 
-form{
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-    margin-top:20px;
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
 }
 
-label{
-    font-weight:bold;
-    color:#ccc;
+label {
+    font-weight: bold;
+    color: #ccc;
 }
 
-select, input{
-    padding:12px;
-    background:#111;
-    border:1px solid #333;
-    color:white;
-    border-radius:6px;
-    font-size:15px;
+select, input {
+    padding: 12px;
+    background: #111;
+    border: 1px solid #333;
+    color: white;
+    border-radius: 6px;
+    font-size: 15px;
 }
 
-select:focus, input:focus{
-    border-color:#b3a1ff;
-    outline:none;
+select:focus, input:focus {
+    border-color: #b3a1ff;
+    outline: none;
 }
 
-button{
-    padding:14px;
-    background:#b3a1ff;
-    color:white;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-size:16px;
-    font-weight:bold;
-    transition:background 0.2s;
-    margin-top:10px;
+button {
+    padding: 14px;
+    background: #b3a1ff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: background 0.2s;
+    margin-top: 10px;
 }
 
-button:hover{
-    background:#9a87ff;
+button:hover {
+    background: #9a87ff;
 }
 
-.desc{
-    color:#aaa;
-    font-size:14px;
-    line-height:1.5;
+.desc {
+    color: #aaa;
+    font-size: 14px;
+    line-height: 1.5;
 }
 </style>
 </head>
@@ -126,7 +127,7 @@ button:hover{
         <h2>Оформлення послуги</h2>
         <p>Оберіть тип провідника, кількість годин супроводу та час.</p>
 
-        <form method="POST">
+        <form method="POST" action="/guide">
             <label for="guide_type">Тип провідника</label>
             <select name="guide_type" id="guide_type" required>
                 <option value="basic">Basic — 20 душ за 1 годину</option>
