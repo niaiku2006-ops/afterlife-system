@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Послуги - AfterLife System</title>
     <style>
-        /* Загальні стилі твоєї головної сторінки */
         body {
             font-family: Arial, sans-serif;
             background-color: #121212;
@@ -15,7 +14,6 @@
             text-align: center;
         }
 
-        /* Шапка сайту (чорна плашка зверху) */
         .header {
             background-color: #1a1a1a;
             padding: 40px 20px;
@@ -23,7 +21,7 @@
         }
 
         .header h1 {
-            color: #9965f4; /* Фіолетовий заголовок AfterLife System */
+            color: #9965f4;
             font-size: 36px;
             margin: 0 0 10px 0;
         }
@@ -34,7 +32,6 @@
             margin: 0 0 30px 0;
         }
 
-        /* Меню навігації в одну лінію, як на скріншоті */
         .nav {
             border-top: 1px solid #333;
             padding-top: 15px;
@@ -44,7 +41,7 @@
         }
 
         .nav a {
-            color: #ffffff; /* Кнопочки меню білого кольору */
+            color: #ffffff;
             text-decoration: none;
             font-size: 16px;
             font-weight: normal;
@@ -55,7 +52,6 @@
             color: #bb86fc;
         }
 
-        /* Контейнер для вертикального списку карт */
         .content-container {
             max-width: 800px;
             margin: 40px auto;
@@ -65,17 +61,15 @@
             gap: 24px;
         }
 
-        /* Картка послуги (один в один як блоки "Про сайт" та "Як працюють душі") */
         .service-card {
             background-color: #1c1c1c;
             border-radius: 12px;
             padding: 30px;
-            text-align: left; /* Текст ліворуч, як на головній */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            text-align: left;
         }
 
         .service-card h2 {
-            color: #9965f4; /* Фіолетовий підзаголовок */
+            color: #9965f4;
             font-size: 22px;
             margin-top: 0;
             margin-bottom: 12px;
@@ -88,12 +82,11 @@
             margin-bottom: 20px;
         }
 
-        /* Велика кнопка всередині картки */
         .action-btn {
             display: block;
             width: 100%;
             box-sizing: border-box;
-            background-color: #9965f4; /* Фіолетова кнопка */
+            background-color: #9965f4;
             color: #ffffff;
             border: none;
             padding: 14px;
@@ -109,10 +102,6 @@
         .action-btn:hover {
             background-color: #b388ff;
             transform: translateY(-1px);
-        }
-
-        .action-btn:active {
-            transform: translateY(0);
         }
 
         form {
@@ -146,21 +135,13 @@
         <div class="service-card">
             <h2>VIP Котел з гідромасажем</h2>
             <p>Заміна стандартного киплячого котла на елітну модель з регулюванням температури смоли, гідромасажними форсунками та приємною фоновою музикою для комфортного відбування покарання.</p>
-            <form action="/book_service" method="POST">
-                <input type="hidden" name="service_name" value="VIP Котел з гідромасажем">
-                <input type="hidden" name="cost" value="50">
-                <button type="submit" class="action-btn">Замовити котел (50 душ)</button>
-            </form>
+            <a href="/boiler" class="action-btn">Перейти до замовлення Бойлера</a>
         </div>
 
         <div class="service-card">
             <h2>Персональний Провідник</h2>
             <p>Супровід від досвідченого демона або ангела-стажера, який допоможе уникнути черг на розподілі, детально пояснить місцеві правила та допоможе адаптуватися до умов вашого нового потойбічного перебування.</p>
-            <form action="/book_service" method="POST">
-                <input type="hidden" name="service_name" value="Персональний Провідник">
-                <input type="hidden" name="cost" value="70">
-                <button type="submit" class="action-btn">Замовити провідника (70 душ)</button>
-            </form>
+            <a href="/guide" class="action-btn">Перейти до Провідника (Гіда)</a>
         </div>
 
     </div>
