@@ -6,53 +6,51 @@ from flask import Flask, render_template, request, redirect, session, url_for
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
-# Використовуємо глобальне з'єднання з базою
+# Глобальне підключення до бази в пам'яті
 _SHARED_CONN = sqlite3.connect(":memory:", check_same_thread=False)
 
 def get_connection():
-    return _SHARED_CONN
-
-def init_db():
-    try:
-        conn = get_connection()
-        c = conn.cursor()
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT UNIQUE,
-                password TEXT,
-                nickname TEXT,
-                avatar TEXT,
-                souls INTEGER DEFAULT 100,
-                last_result TEXT
-            )
-        ''')
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS services (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                name TEXT,
-                used INTEGER DEFAULT 0,
-                booking_date TEXT
-            )
-        ''')
-        # Створюємо користувачів для тестів автоматично
+    """Повертає підключення, ГАРАНТОВАНО створюючи таблиці, якщо їх немає."""
+    conn = _SHARED_CONN
+    c = conn.cursor()
+    # Створюємо таблиці при кожному виклику з'єднання (якщо їх немає)
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE,
+            password TEXT,
+            nickname TEXT,
+            avatar TEXT,
+            souls INTEGER DEFAULT 100,
+            last_result TEXT
+        )
+    ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS services (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            name TEXT,
+            used INTEGER DEFAULT 0,
+            booking_date TEXT
+        )
+    ''')
+    # Автоматично додаємо тестових користувачів, якщо таблиця порожня
+    c.execute("SELECT COUNT(*) FROM users")
+    if c.fetchone()[0] == 0:
         c.execute("INSERT OR IGNORE INTO users (id, username, password, nickname, avatar, souls) VALUES (1, 'Admin', 'admin123', 'Адміністратор', 'default.png', 500)")
         c.execute("INSERT OR IGNORE INTO users (id, username, password, nickname, avatar, souls) VALUES (2, 'User', 'user123', 'Грішник', 'default.png', 100)")
-        conn.commit()
-    except Exception as e:
-        print(f"Помилка ініціалізації БД: {e}")
-
-init_db()
+    conn.commit()
+    return conn
 
 @app.route('/')
 def index():
+    # Навіть на головній ініціалізуємо базу для профілактики
+    get_connection()
     return render_template('index.html')
 
 @app.route('/services')
 def services():
     if 'user_id' not in session:
-        # Тимчасово авторизуємо як тестового користувача, якщо сесія злетіла, щоб не було білого екрана
         session['user_id'] = 2
         session['username'] = 'User'
     return render_template('services.html')
