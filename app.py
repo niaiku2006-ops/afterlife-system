@@ -13,7 +13,6 @@ def get_connection():
     """Повертає підключення, ГАРАНТОВАНО створюючи таблиці, якщо їх немає."""
     conn = _SHARED_CONN
     c = conn.cursor()
-    # Створюємо таблиці при кожному виклику з'єднання (якщо їх немає)
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +33,7 @@ def get_connection():
             booking_date TEXT
         )
     ''')
-    # Автоматично додаємо тестових користувачів, якщо таблиця порожня
+    # Створюємо користувачів один раз, якщо таблиця порожня
     c.execute("SELECT COUNT(*) FROM users")
     if c.fetchone()[0] == 0:
         c.execute("INSERT OR IGNORE INTO users (id, username, password, nickname, avatar, souls) VALUES (1, 'Admin', 'admin123', 'Адміністратор', 'default.png', 500)")
@@ -44,27 +43,26 @@ def get_connection():
 
 @app.route('/')
 def index():
-    # Навіть на головній ініціалізуємо базу для профілактики
     get_connection()
     return render_template('index.html')
 
 @app.route('/services')
 def services():
     if 'user_id' not in session:
-        session['user_id'] = 2
-        session['username'] = 'User'
+        return redirect(url_for('login'))
     return render_template('services.html')
 
 @app.route('/test')
 def test():
     if 'user_id' not in session:
-        session['user_id'] = 2
-        session['username'] = 'User'
+        return redirect(url_for('login'))
     return render_template('test.html')
 
 @app.route('/save_test_result', methods=['POST'])
 def save_test_result():
-    user_id = session.get('user_id', 2)
+    if 'user_id' not in session:
+        return "Потрібна авторизація", 401
+    user_id = session['user_id']
     result_text = request.form.get('result', 'Невідомий результат')
     
     try:
@@ -79,8 +77,7 @@ def save_test_result():
 @app.route('/boiler', methods=['GET', 'POST'])
 def boiler():
     if 'user_id' not in session:
-        session['user_id'] = 2
-        session['username'] = 'User'
+        return redirect(url_for('login'))
         
     if request.method == 'POST':
         try:
@@ -121,8 +118,7 @@ def boiler():
 @app.route('/guide', methods=['GET', 'POST'])
 def guide():
     if 'user_id' not in session:
-        session['user_id'] = 2
-        session['username'] = 'User'
+        return redirect(url_for('login'))
         
     if request.method == 'POST':
         try:
@@ -162,6 +158,9 @@ def guide():
 
 @app.route('/admin')
 def admin():
+    if 'user_id' not in session or not session.get('admin'):
+        return "Доступ заборонено!", 403
+        
     conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT id, username, nickname, avatar, souls, last_result FROM users")
@@ -181,11 +180,14 @@ def register():
         password = request.form.get('password')
         nickname = request.form.get('nickname')
         
+        if not username or not password:
+            return "Будь ласка, заповніть логін та пароль!"
+            
         conn = get_connection()
         c = conn.cursor()
         try:
             c.execute("INSERT INTO users (username, password, nickname, avatar) VALUES (?, ?, ?, 'default.png')",
-                      (username, password, nickname))
+                      (username, password, nickname if nickname else username))
             conn.commit()
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
@@ -204,20 +206,20 @@ def login():
         user = c.fetchone()
         
         if user:
+            session.clear()  # Очищуємо стару сесію перед входом нового користувача
             session['user_id'] = user[0]
             session['username'] = user[1]
             if user[1] in ['God', 'Admin']:
                 session['admin'] = True
             return redirect(url_for('profile'))
         else:
-            return "Невірний логін або пароль грішника!"
+            return "Невірний логін або пароль грішника! Спробуйте ще раз або зареєструйтесь."
     return render_template('login.html')
 
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     if 'user_id' not in session:
-        session['user_id'] = 2
-        session['username'] = 'User'
+        return redirect(url_for('login'))
         
     conn = get_connection()
     c = conn.cursor()
@@ -230,8 +232,10 @@ def profile():
             
     c.execute("SELECT * FROM users WHERE id=?", (session['user_id'],))
     user = c.fetchone()
+    
     if not user:
-        user = (2, 'User', 'user123', 'Грішник', 'default.png', 100, '')
+        session.clear()
+        return redirect(url_for('login'))
     
     c.execute("SELECT * FROM services WHERE user_id=?", (session['user_id'],))
     user_services = c.fetchall()
