@@ -73,7 +73,7 @@ def register():
             conn.commit()
             return redirect("/login")
         except sqlite3.IntegrityError:
-            return "Користувач з таким логіном вже існує в Книзі Доль!"
+            return "Коривувач з таким логіном вже існує в Книзі Доль!"
         finally:
             conn.close()
 
@@ -124,13 +124,11 @@ def profile():
                 "UPDATE users SET avatar=? WHERE id=?",
                 (new_avatar, session["user_id"]),
             )
-
         if new_nickname:
             c.execute(
                 "UPDATE users SET nickname=? WHERE id=?",
                 (new_nickname, session["user_id"]),
             )
-
         conn.commit()
 
     c.execute("SELECT * FROM users WHERE id=?", (session["user_id"],))
@@ -173,45 +171,53 @@ def test():
     return render_template("test.html", submitted=False)
 
 
-@app.route("/services")
+# ОНОВЛЕНО: Додали підтримку POST про всяк випадок
+@app.route("/services", methods=["GET", "POST"])
 def services():
     if "user_id" not in session:
         return redirect("/login")
     return render_template("services.html")
 
 
-@app.route("/book_service", methods=["POST"])
+# ОНОВЛЕНО: Додали підтримку GET про всяк випадок
+@app.route("/book_service", methods=["GET", "POST"])
 def book_service():
     if "user_id" not in session:
         return redirect("/login")
 
-    service_name = request.form.get("service_name")
-    cost = int(request.form.get("cost", 0))
+    if request.method == "POST":
+        service_name = request.form.get("service_name")
+        cost = int(request.form.get("cost", 0))
 
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("SELECT souls FROM users WHERE id=?", (session["user_id"],))
-    user_souls = c.fetchone()[0]
+        conn = get_connection()
+        c = conn.cursor()
+        c.execute("SELECT souls FROM users WHERE id=?", (session["user_id"],))
+        user_souls = c.fetchone()[0]
 
-    if user_souls >= cost:
-        new_souls = user_souls - cost
-        c.execute(
-            "UPDATE users SET souls=? WHERE id=?", (new_souls, session["user_id"])
-        )
-        c.execute(
-            "INSERT INTO services (user_id, name, booking_date) VALUES (?, ?, ?)",
-            (
-                session["user_id"],
-                service_name,
-                datetime.now().strftime("%Y-%m-%d %H:%M"),
-            ),
-        )
-        conn.commit()
-        conn.close()
-        return render_template("success_service.html", service_name=service_name)
-    else:
-        conn.close()
-        return "У вас недостатньо душ для купівлі цієї індульгенції чи послуги!"
+        if user_souls >= cost:
+            new_souls = user_souls - cost
+            c.execute(
+                "UPDATE users SET souls=? WHERE id=?",
+                (new_souls, session["user_id"]),
+            )
+            c.execute(
+                "INSERT INTO services (user_id, name, booking_date) VALUES (?, ?, ?)",
+                (
+                    session["user_id"],
+                    service_name,
+                    datetime.now().strftime("%Y-%m-%d %H:%M"),
+                ),
+            )
+            conn.commit()
+            conn.close()
+            return render_template(
+                "success_service.html", service_name=service_name
+            )
+        else:
+            conn.close()
+            return "У вас недостатньо душ для купівлі цієї індульгенції чи послуги!"
+
+    return redirect("/services")
 
 
 @app.route("/admin")
