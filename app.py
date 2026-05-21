@@ -1,21 +1,18 @@
 import os
 import sqlite3
 from datetime import datetime
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, render_template, request, redirect, session, url_for
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
-
 def get_connection():
     return sqlite3.connect("/tmp/users.db")
-
 
 def init_db():
     conn = get_connection()
     c = conn.cursor()
-    c.execute(
-        """
+    c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE,
@@ -25,10 +22,8 @@ def init_db():
             souls INTEGER DEFAULT 100,
             last_result TEXT
         )
-    """
-    )
-    c.execute(
-        """
+    ''')
+    c.execute('''
         CREATE TABLE IF NOT EXISTS services (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER,
@@ -36,249 +31,217 @@ def init_db():
             used INTEGER DEFAULT 0,
             booking_date TEXT
         )
-    """
-    )
+    ''')
     conn.commit()
     conn.close()
-
 
 init_db()
 
-
-@app.route("/")
+@app.route('/')
 def index():
-    return render_template("index.html")
+    return render_template('index.html')
 
+# МАРШРУТ ДЛЯ СТОРІНКИ ПОСЛУГ (Твоє нове красиве меню з кнопками)
+@app.route('/services')
+def services():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('services.html')
 
-@app.route("/guide")
+# МАРШРУТ ДЛЯ ТЕСТУ
+@app.route('/test')
+def test():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('test.html')
+
+# ЗБЕРЕЖЕННЯ РЕЗУЛЬТАТУ ТЕСТУ (Викликається твоїм JavaScript у test.html)
+@app.route('/save_test_result', methods=['POST'])
+def save_test_result():
+    if 'user_id' not in session:
+        return "Unauthorized", 401
+    result_text = request.form.get('result')
+    
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("UPDATE users SET last_result=? WHERE id=?", (result_text, session['user_id']))
+    conn.commit()
+    conn.close()
+    return "Успішно збережено!"
+
+# МАРШРУТ ДЛЯ БОЙЛЕРУ
+@app.route('/boiler', methods=['GET', 'POST'])
+def boiler():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    if request.method == 'POST':
+        boiler_type = request.form.get('boiler_type')
+        days = int(request.form.get('days', 1))
+        booking_time = request.form.get('booking_time', '')
+        
+        cost_per_day = 30 if boiler_type == 'standard' else 60
+        total_cost = cost_per_day * days
+        service_title = f"Котел {boiler_type.upper()} ({days} дн.)"
+        
+        # Переформатуємо дату для красивого відображення
+        try:
+            dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
+            formatted_date = dt.strftime("%d.%m.%Y %H:%M")
+        except:
+            formatted_date = booking_time
+
+        conn = get_connection()
+        c = conn.cursor()
+        c.execute("SELECT souls FROM users WHERE id=?", (session['user_id'],))
+        user_souls = c.fetchone()[0]
+        
+        if user_souls >= total_cost:
+            new_souls = user_souls - total_cost
+            c.execute("UPDATE users SET souls=? WHERE id=?", (new_souls, session['user_id']))
+            c.execute("INSERT INTO services (user_id, name, booking_date) VALUES (?, ?, ?)",
+                      (session['user_id'], service_title, formatted_date))
+            conn.commit()
+            conn.close()
+            return render_template('success_service.html', service_name=service_title)
+        else:
+            conn.close()
+            return "У вас недостатньо душ для оренди цього котла! 💀"
+            
+    return render_template('boiler.html')
+
+# МАРШРУТ ДЛЯ ПРОВІДНИКА (ГІДА)
+@app.route('/guide', methods=['GET', 'POST'])
 def guide():
-    return render_template("guide.html")
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
+    if request.method == 'POST':
+        guide_type = request.form.get('guide_type')
+        hours = int(request.form.get('hours', 1))
+        booking_time = request.form.get('booking_time', '')
+        
+        cost_per_hour = 20 if guide_type == 'basic' else 40
+        total_cost = cost_per_hour * hours
+        service_title = f"Провідник {guide_type.upper()} ({hours} год.)"
+        
+        try:
+            dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
+            formatted_date = dt.strftime("%d.%m.%Y %H:%M")
+        except:
+            formatted_date = booking_time
 
+        conn = get_connection()
+        c = conn.cursor()
+        c.execute("SELECT souls FROM users WHERE id=?", (session['user_id'],))
+        user_souls = c.fetchone()[0]
+        
+        if user_souls >= total_cost:
+            new_souls = user_souls - total_cost
+            c.execute("UPDATE users SET souls=? WHERE id=?", (new_souls, session['user_id']))
+            c.execute("INSERT INTO services (user_id, name, booking_date) VALUES (?, ?, ?)",
+                      (session['user_id'], service_title, formatted_date))
+            conn.commit()
+            conn.close()
+            return render_template('success_service.html', service_name=service_title)
+        else:
+            conn.close()
+            return "У вас недостатньо душ для найму провідника! 💀"
+            
+    return render_template('guide.html')
 
-@app.route("/register", methods=["GET", "POST"])
+# МАРШРУТ АДМІНКИ БОГА
+@app.route('/admin')
+def admin():
+    if 'user_id' not in session or not session.get('admin'):
+        return "Доступ заборонено! Тільки для Творця.", 403
+        
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("SELECT id, username, nickname, avatar, souls, last_result FROM users")
+    users = c.fetchall()
+    
+    users_data = []
+    for u in users:
+        c.execute("SELECT id, name, used, booking_date FROM services WHERE user_id=?", (u[0],))
+        srv = c.fetchall()
+        users_data.append({
+            'info': u,
+            'services': srv
+        })
+    conn.close()
+    return render_template('admin.html', users_data=users_data)
+
+# АВТОРИЗАЦІЯ, РЕЄСТРАЦІЯ, ПРОФІЛЬ
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        nickname = request.form.get("nickname")
-        avatar = request.form.get("avatar", "default.png")
-
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        nickname = request.form.get('nickname')
+        
         conn = get_connection()
         c = conn.cursor()
         try:
-            c.execute(
-                "INSERT INTO users (username, password, nickname, avatar) VALUES (?, ?, ?, ?)",
-                (username, password, nickname, avatar),
-            )
+            c.execute("INSERT INTO users (username, password, nickname, avatar) VALUES (?, ?, ?, 'default.png')",
+                      (username, password, nickname))
             conn.commit()
-            return redirect("/login")
+            return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            return "Коривувач з таким логіном вже існує в Книзі Доль!"
+            return "Користувач з таким логіном вже існує в Книзі Доль!"
         finally:
             conn.close()
+    return render_template('register.html')
 
-    return render_template("register.html")
-
-
-@app.route("/login", methods=["GET", "POST"])
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        
         conn = get_connection()
         c = conn.cursor()
-        c.execute(
-            "SELECT * FROM users WHERE username=? AND password=?",
-            (username, password),
-        )
+        c.execute("SELECT * FROM users WHERE username=? AND password=?", (username, password))
         user = c.fetchone()
         conn.close()
-
+        
         if user:
-            session["user_id"] = user[0]
-            session["username"] = user[1]
-            if user[1] == "God" or user[1] == "Admin":
-                session["admin"] = True
-            return redirect("/profile")
+            session['user_id'] = user[0]
+            session['username'] = user[1]
+            if user[1] in ['God', 'Admin']:
+                session['admin'] = True
+            return redirect(url_for('profile'))
         else:
-            return "Невірний логін або пароль грішника! Спробуйте ще раз."
+            return "Невірний логін або пароль грішника!"
+    return render_template('login.html')
 
-    return render_template("login.html")
-
-
-@app.route("/profile", methods=["GET", "POST"])
+@app.route('/profile', methods=['GET', 'POST'])
 def profile():
-    if "user_id" not in session:
-        return redirect("/login")
-
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+        
     conn = get_connection()
     c = conn.cursor()
-
-    if request.method == "POST":
-        new_avatar = request.form.get("avatar")
-        new_nickname = request.form.get("nickname")
-
-        if new_avatar:
-            c.execute(
-                "UPDATE users SET avatar=? WHERE id=?",
-                (new_avatar, session["user_id"]),
-            )
+    
+    if request.method == 'POST':
+        new_nickname = request.form.get('nickname')
         if new_nickname:
-            c.execute(
-                "UPDATE users SET nickname=? WHERE id=?",
-                (new_nickname, session["user_id"]),
-            )
-        conn.commit()
-
-    c.execute("SELECT * FROM users WHERE id=?", (session["user_id"],))
+            c.execute("UPDATE users SET nickname=? WHERE id=?", (new_nickname, session['user_id']))
+            conn.commit()
+            
+    c.execute("SELECT * FROM users WHERE id=?", (session['user_id'],))
     user = c.fetchone()
-
-    c.execute("SELECT * FROM services WHERE user_id=?", (session["user_id"],))
+    
+    c.execute("SELECT * FROM services WHERE user_id=?", (session['user_id'],))
     user_services = c.fetchall()
     conn.close()
+    
+    return render_template('profile.html', user=user, services=user_services)
 
-    return render_template("profile.html", user=user, services=user_services)
-
-
-@app.route("/test", methods=["GET", "POST"])
-def test():
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if request.method == "POST":
-        score = 0
-        for i in range(1, 6):
-            answer = request.form.get(f"q{i}")
-            if answer == "bad":
-                score += 20
-            elif answer == "neutral":
-                score += 10
-
-        result = "Рай" if score < 40 else "Пекло"
-
-        conn = get_connection()
-        c = conn.cursor()
-        c.execute(
-            "UPDATE users SET last_result=? WHERE id=?",
-            (result, session["user_id"]),
-        )
-        conn.commit()
-        conn.close()
-
-        return render_template("test.html", result=result, submitted=True)
-
-    return render_template("test.html", submitted=False)
-
-
-# ОНОВЛЕНО: Додали підтримку POST про всяк випадок
-@app.route("/services", methods=["GET", "POST"])
-def services():
-    if "user_id" not in session:
-        return redirect("/login")
-    return render_template("services.html")
-
-
-# ОНОВЛЕНО: Додали підтримку GET про всяк випадок
-@app.route("/book_service", methods=["GET", "POST"])
-def book_service():
-    if "user_id" not in session:
-        return redirect("/login")
-
-    if request.method == "POST":
-        service_name = request.form.get("service_name")
-        cost = int(request.form.get("cost", 0))
-
-        conn = get_connection()
-        c = conn.cursor()
-        c.execute("SELECT souls FROM users WHERE id=?", (session["user_id"],))
-        user_souls = c.fetchone()[0]
-
-        if user_souls >= cost:
-            new_souls = user_souls - cost
-            c.execute(
-                "UPDATE users SET souls=? WHERE id=?",
-                (new_souls, session["user_id"]),
-            )
-            c.execute(
-                "INSERT INTO services (user_id, name, booking_date) VALUES (?, ?, ?)",
-                (
-                    session["user_id"],
-                    service_name,
-                    datetime.now().strftime("%Y-%m-%d %H:%M"),
-                ),
-            )
-            conn.commit()
-            conn.close()
-            return render_template(
-                "success_service.html", service_name=service_name
-            )
-        else:
-            conn.close()
-            return "У вас недостатньо душ для купівлі цієї індульгенції чи послуги!"
-
-    return redirect("/services")
-
-
-@app.route("/admin")
-def admin():
-    if not session.get("admin"):
-        return "Доступ закритий! Сюди пускають тільки Бога або Адміна.", 403
-
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("SELECT id, username, nickname, souls, last_result FROM users")
-    all_users = c.fetchall()
-
-    c.execute(
-        """
-        SELECT services.id, users.username, services.name, services.used, services.booking_date 
-        FROM services 
-        JOIN users ON services.user_id = users.id 
-        WHERE services.used = 0
-    """
-    )
-    pending_services = c.fetchall()
-    conn.close()
-
-    return render_template(
-        "admin.html", users=all_users, services=pending_services
-    )
-
-
-@app.route("/use_service/<int:service_id>")
-def use_service(service_id):
-    if not session.get("admin"):
-        return redirect("/profile")
-
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute("UPDATE services SET used = 1 WHERE id=?", (service_id,))
-    conn.commit()
-    conn.close()
-    return redirect("/admin")
-
-
-@app.route("/give/<int:user_id>/<int:amount>")
-def give(user_id, amount):
-    if not session.get("admin"):
-        return redirect("/profile")
-
-    conn = get_connection()
-    c = conn.cursor()
-    c.execute(
-        "UPDATE users SET souls = souls + ? WHERE id=?", (amount, user_id)
-    )
-    conn.commit()
-    conn.close()
-    return redirect("/admin")
-
-
-@app.route("/logout")
+@app.route('/logout')
 def logout():
     session.clear()
-    return redirect("/")
+    return redirect(url_for('index'))
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)
