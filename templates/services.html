@@ -7,69 +7,88 @@
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
+            background-color: #121212;
             color: #ffffff;
             margin: 0;
-            padding: 20px;
-            text-align: center;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
+
         .nav {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         .nav a {
             color: #bb86fc;
             text-decoration: none;
             margin: 0 15px;
             font-size: 18px;
+            transition: color 0.2s;
         }
         .nav a:hover {
+            color: #9965f4;
             text-decoration: underline;
         }
-        .container {
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            color: #a0a0a0;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        /* Контейнер, який вишикує кнопки в один стовпчик */
+        .menu-container {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            flex-direction: column;
             gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .card {
-            background-color: #2d2d2d;
-            border: 2px solid #3d3d3d;
-            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
             padding: 20px;
-            width: 280px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-            transition: transform 0.2s;
         }
-        .card:hover {
-            transform: translateY(-5px);
-            border-color: #bb86fc;
-        }
-        .card h3 {
-            color: #cf6679;
-            margin-top: 0;
-        }
-        .price {
-            font-size: 20px;
-            color: #03dac6;
-            font-weight: bold;
-            margin: 15px 0;
-        }
-        button {
+
+        /* Стиль для посилань-кнопок та кнопок у формах */
+        .menu-btn {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
             background-color: #bb86fc;
             color: #121212;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 18px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            width: 100%;
-            transition: background-color 0.2s;
+            text-decoration: none;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            transition: transform 0.2s, background-color 0.2s, box-shadow 0.2s;
         }
-        button:hover {
+
+        .menu-btn:hover {
             background-color: #9965f4;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(153, 101, 244, 0.4);
+        }
+
+        .menu-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Окрема форма, щоб кнопка займала всю ширину */
+        form {
+            width: 100%;
+            margin: 0;
+            padding: 0;
         }
     </style>
 </head>
@@ -77,46 +96,28 @@
 
     <div class="nav">
         <a href="/">Головна</a>
-        <a href="/guide">Провідник</a>
         <a href="/profile">Профіль</a>
     </div>
 
-    <h1>Магазин Послуг та Індульгенцій</h1>
-    <p>Витрачайте свої зароблені душі на покращення умов перебування в потойбічному світі.</p>
+    <h1>Маніпуляції Долею</h1>
+    <p class="subtitle">Оберіть необхідну дію для вашої душі</p>
 
-    <div class="container">
-        <div class="card">
-            <h3>VIP Котел з гідромасажем</h3>
-            <p>Замість киплячої смоли — приємна тепла мінеральна вода. Комфортне відбування покарання.</p>
-            <div class="price">50 душ</div>
-            <form action="/book_service" method="POST">
-                <input type="hidden" name="service_name" value="VIP Котел з гідромасажем">
-                <input type="hidden" name="cost" value="50">
-                <button type="submit">Замовити котел</button>
-            </form>
-        </div>
+    <div class="menu-container">
 
-        <div class="card">
-            <h3>Повна Індульгенція</h3>
-            <p>Миттєве списання дрібних та середніх гріхів прямо з Книги Доль.</p>
-            <div class="price">80 душ</div>
-            <form action="/book_service" method="POST">
-                <input type="hidden" name="service_name" value="Повна Індульгенція">
-                <input type="hidden" name="cost" value="80">
-                <button type="submit">Оформити</button>
-            </form>
-        </div>
+        <a href="/test" class="menu-btn">Пройти тест</a>
 
-        <div class="card">
-            <h3>Контрабандний перепустку в Рай</h3>
-            <p>Дозволяє тимчасово (або назавжди, якщо пощастить) зайти в Едемський сад без черги.</p>
-            <div class="price">150 душ</div>
-            <form action="/book_service" method="POST">
-                <input type="hidden" name="service_name" value="Контрабандний перепустку в Рай">
-                <input type="hidden" name="cost" value="150">
-                <button type="submit">Придбати</button>
-            </form>
-        </div>
+        <form action="/book_service" method="POST">
+            <input type="hidden" name="service_name" value="Комфортабельний Котел">
+            <input type="hidden" name="cost" value="50">
+            <button type="submit" class="menu-btn">Замовити котел (50 душ)</button>
+        </form>
+
+        <form action="/book_service" method="POST">
+            <input type="hidden" name="service_name" value="Персональний Провідник">
+            <input type="hidden" name="cost" value="70">
+            <button type="submit" class="menu-btn">Замовити провідника (70 душ)</button>
+        </form>
+
     </div>
 
 </body>
