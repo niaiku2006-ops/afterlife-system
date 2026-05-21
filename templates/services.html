@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Послуги</title>
+
+    <style>
+        body { margin:0; font-family:Arial,sans-serif; background:#0b0b0b; color:#e0e0e0; }
+        header { background:#111; padding:20px; text-align:center; border-bottom:1px solid #444; }
+        h1 { margin:0; color:#b3a1ff; }
+        nav { text-align:center; padding:10px; background:#151515; }
+        nav a { color:#ccc; margin:0 15px; text-decoration:none; }
+        nav a:hover { color:#b3a1ff; }
+        main { padding:20px; text-align:center; }
+        .card { background:#1a1a1a; margin:15px auto; padding:20px; max-width:400px; border-radius:10px; box-shadow:0 0 10px rgba(179,161,255,0.2); }
+        button { padding:10px 20px; background:#b3a1ff; border:none; border-radius:5px; cursor:pointer; color:white; }
+        button:hover { background:#9a87ff; }
+        footer { text-align:center; padding:10px; background:#111; border-top:1px solid #444; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Наші послуги</h1>
+</header>
+
+<nav>
+    <a href="/">Про нас</a>
+    <a href="/services">Послуги</a>
+    <a href="/profile">Профіль</a>
+</nav>
+
+<main>
+    <div class="card">
+        <h3>Тест для проходження у рай</h3>
+        <p>Пройдіть перевірку та дізнайтесь свою долю</p>
+        <p>Ціна: 10 душ</p>
+        <button onclick="location.href='/start_test'">Почати спробу</button>
+    </div>
+
+    <div class="card">
+        <h3>Пошук провідника</h3>
+        <p>Знайдіть наставника для адаптації</p>
+        <button onclick="location.href='/guide'">Замовити</button>
+    </div>
+
+    <div class="card">
+        <h3>Бронювання котла</h3>
+        <p>Забронюйте місце заздалегідь</p>
+        <button onclick="location.href='/boiler'">Забронювати</button>
+    </div>
+</main>
+
+<footer>
+    <p>© 2026 AfterLife System</p>
+</footer>
+
+</body>
+</html>

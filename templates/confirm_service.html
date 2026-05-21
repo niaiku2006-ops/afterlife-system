@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Підтвердження замовлення</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#0b0b0b;
+color:#e0e0e0;
+}
+
+header{
+background:#111;
+padding:20px;
+text-align:center;
+}
+
+nav{
+background:#151515;
+padding:10px;
+text-align:center;
+}
+
+nav a{
+color:#ccc;
+margin:0 15px;
+text-decoration:none;
+}
+
+nav a:hover{
+color:#b3a1ff;
+}
+
+.box{
+background:#1a1a1a;
+margin:60px auto;
+padding:30px;
+max-width:650px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 0 15px rgba(179,161,255,0.15);
+}
+
+h2{
+color:#b3a1ff;
+margin-top:0;
+}
+
+.info{
+background:#111;
+padding:15px;
+border-radius:8px;
+margin-top:15px;
+text-align:left;
+}
+
+.row{
+margin:8px 0;
+}
+
+.price{
+font-size:22px;
+color:#b3a1ff;
+margin-top:15px;
+}
+
+button{
+display:block;
+margin:15px auto;
+padding:12px;
+width:80%;
+cursor:pointer;
+background:#b3a1ff;
+border:none;
+border-radius:6px;
+color:white;
+font-size:15px;
+}
+
+button:hover{
+background:#9a87ff;
+}
+
+.secondary{
+background:#333;
+}
+
+.secondary:hover{
+background:#555;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>Підтвердження</h1>
+</header>
+
+<nav>
+<a href="/">Головна</a>
+<a href="/services">Послуги</a>
+<a href="/profile">Профіль</a>
+</nav>
+
+<div class="box">
+
+<h2>Перевір замовлення</h2>
+
+<div class="info">
+
+{% if pending.type == "guide" %}
+
+<div class="row">
+<b>Послуга:</b> Провідник
+</div>
+
+<div class="row">
+<b>Тип:</b> {{ pending.title }}
+</div>
+
+<div class="row">
+<b>Кількість годин:</b> {{ pending.hours }}
+</div>
+
+{% elif pending.type == "boiler" %}
+
+<div class="row">
+<b>Послуга:</b> Котел
+</div>
+
+<div class="row">
+<b>Тип:</b> {{ pending.title }}
+</div>
+
+<div class="row">
+<b>Кількість днів:</b> {{ pending.days }}
+</div>
+
+{% endif %}
+
+<div class="price">
+До оплати: {{ pending.price }} душ
+</div>
+
+<div class="row">
+У тебе зараз: {{ user[5] }} душ
+</div>
+
+</div>
+
+<form method="POST">
+
+<button>
+Підтвердити оплату
+</button>
+
+</form>
+
+<a href="/services">
+<button class="secondary">
+Скасувати
+</button>
+</a>
+
+</div>
+
+</body>
+</html>

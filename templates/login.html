@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вхід</title>
+
+<style>
+
+body {
+margin:0;
+font-family: Arial;
+background:#0b0b0b;
+color:white;
+}
+
+header{
+background:#111;
+padding:20px;
+text-align:center;
+}
+
+nav{
+background:#151515;
+padding:10px;
+text-align:center;
+}
+
+nav a{
+color:#ccc;
+margin:0 15px;
+text-decoration:none;
+}
+
+nav a:hover{
+color:#b3a1ff;
+}
+
+.box{
+background:#1a1a1a;
+margin:50px auto;
+padding:20px;
+max-width:500px;
+border-radius:10px;
+text-align:center;
+}
+
+input{
+display:block;
+margin:10px auto;
+padding:12px;
+width:80%;
+background:#111;
+border:none;
+color:white;
+border-radius:5px;
+}
+
+button{
+display:block;
+margin:10px auto;
+padding:12px;
+width:80%;
+cursor:pointer;
+background:#b3a1ff;
+border:none;
+border-radius:5px;
+color:white;
+}
+
+button:hover{
+background:#9a87ff;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>Тест долі</h1>
+</header>
+
+<nav>
+<a href="/">Головна</a>
+<a href="/services">Послуги</a>
+<a href="/profile">Профіль</a>
+</nav>
+
+<div class="box">
+
+<h2>🔐 Вхід</h2>
+
+<form method="POST">
+
+<input 
+type="text" 
+name="username" 
+placeholder="Логін" 
+required
+>
+
+<input 
+type="password" 
+name="password" 
+placeholder="Пароль"
+required
+>
+
+<button type="submit">
+Увійти
+</button>
+
+</form>
+
+<br>
+
+<p>
+Немає аккаунта?
+</p>
+
+<a href="/register">
+<button>
+Реєстрація
+</button>
+</a>
+
+</div>
+
+</body>
+</html>

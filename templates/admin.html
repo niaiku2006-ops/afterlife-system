@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Адмінка Бога</title>
+<style>
+body{ margin:0; font-family:Arial; background:#0b0b0b; color:white; }
+header{ background:#111; padding:20px; text-align:center; }
+nav{ background:#151515; padding:10px; text-align:center; }
+nav a{ color:#ccc; margin:0 15px; text-decoration:none; }
+nav a:hover{ color:#b3a1ff; }
+.container{ max-width:1100px; margin:30px auto; padding:20px; }
+.calendar-box { background: #1a1a1a; padding: 20px; margin-bottom: 25px; border-radius: 10px; border: 1px solid #b3a1ff; text-align: center; }
+.calendar-box input[type="date"] { padding: 10px; background: #111; border: 1px solid #444; color: white; border-radius: 5px; font-size: 16px; margin-right: 10px; }
+.card{ background:#1a1a1a; padding:20px; margin-bottom:20px; border-radius:10px; }
+.user-head{ display:flex; align-items:center; gap:20px; }
+img{ width:80px; height:80px; border-radius:50%; object-fit:cover; }
+button{ padding:10px 14px; margin:5px; cursor:pointer; background:#b3a1ff; border:none; border-radius:5px; color:white; }
+button:hover{ background:#9a87ff; }
+.service{ background:#111; padding:12px; margin:8px 0; border-radius:8px; border-left: 4px solid #444; }
+.service.matched { border-left: 4px solid #5cff9d; background: #142218; }
+.empty{ color:#aaa; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Адмін панель Бога 👁️</h1>
+</header>
+
+<nav>
+    <a href="/">Головна</a>
+    <a href="/services">Послуги</a>
+    <a href="/profile">Профіль</a>
+</nav>
+
+<div class="container">
+
+    <div class="calendar-box">
+        <h3>Перегляд розкладу на день</h3>
+        <input type="date" id="admin-calendar" onchange="filterByDate()">
+        <button onclick="clearFilter()">Показати всі замовлення</button>
+    </div>
+
+    {% for u in users %}
+    <div class="card user-card" id="user-{{ u[0] }}">
+        <div class="user-head">
+            {% if u[4] %}
+                <img src="/static/avatars/{{u[4]}}">
+            {% else %}
+                <img src="https://i.imgur.com/6VBx3io.png">
+            {% endif %}
+            <div>
+                <h2>{{ u[3] }}</h2>
+                <p>Логін: {{ u[1] }}</p>
+                <p>😈 Душі: {{ u[5] }}</p>
+            </div>
+        </div>
+
+        <a href="/give/{{u[0]}}/10"><button>+10 душ</button></a>
+        <a href="/give/{{u[0]}}/100"><button>+100 душ</button></a>
+        <a href="/give/{{u[0]}}/1000"><button>+1000 душ</button></a>
+
+        <hr>
+        <h3>📋 Діючі послуги</h3>
+
+        <div class="user-services-list">
+            {% set ns = namespace(has_services=false) %}
+            {% for s in active_services %}
+                {% if s[1] == u[0] %}
+                    {% set ns.has_services = true %}
+                    <div class="service" data-date="{{ s[5].split(' ')[0] if s[5] else '' }}">
+                        <b>📅 {{ s[5] if s[5] else 'Час не вказано' }}</b> — {{ s[4] }}
+                        <a href="/use_service/{{ s[0] }}">
+                            <button style="background: #222; border: 1px solid #444; float: right; margin-top: -5px;">Виконано</button>
+                        </a>
+                        <div style="clear: both;"></div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            {% if not ns.has_services %}
+                <p class="empty">Немає активних послуг.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function filterByDate() {
+    const selectedDate = document.getElementById('admin-calendar').value;
+    if (!selectedDate) return;
+
+    const parts = selectedDate.split('-');
+    const targetDateFormatted = `${parts[2]}.${parts[1]}.${parts[0]}`; // Перетворюємо у ДД.ММ.РРРР
+
+    document.querySelectorAll('.user-card').forEach(card => {
+        const services = card.querySelectorAll('.service');
+        let hasActiveOnThisDay = false;
+
+        services.forEach(service => {
+            if (service.getAttribute('data-date') === targetDateFormatted) {
+                service.classList.add('matched');
+                hasActiveOnThisDay = true;
+            } else {
+                service.classList.remove('matched');
+            }
+        });
+
+        card.style.display = hasActiveOnThisDay ? 'block' : 'none';
+    });
+}
+
+function clearFilter() {
+    document.getElementById('admin-calendar').value = '';
+    document.querySelectorAll('.user-card').forEach(card => card.style.display = 'block');
+    document.querySelectorAll('.service').forEach(service => service.classList.remove('matched'));
+}
+</script>
+
+</body>
+</html>

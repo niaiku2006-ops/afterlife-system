@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Послугу активовано</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#0b0b0b;
+color:#e0e0e0;
+}
+
+header{
+background:#111;
+padding:20px;
+text-align:center;
+}
+
+nav{
+background:#151515;
+padding:10px;
+text-align:center;
+}
+
+nav a{
+color:#ccc;
+margin:0 15px;
+text-decoration:none;
+}
+
+nav a:hover{
+color:#b3a1ff;
+}
+
+.box{
+background:#1a1a1a;
+margin:60px auto;
+padding:30px;
+max-width:600px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 0 15px rgba(179,161,255,0.2);
+}
+
+h2{
+color:#b3a1ff;
+}
+
+.info{
+background:#111;
+padding:15px;
+border-radius:8px;
+margin-top:20px;
+}
+
+button{
+display:block;
+margin:15px auto;
+padding:12px;
+width:80%;
+cursor:pointer;
+background:#b3a1ff;
+border:none;
+border-radius:6px;
+color:white;
+font-size:15px;
+}
+
+button:hover{
+background:#9a87ff;
+}
+
+.secondary{
+background:#333;
+}
+
+.secondary:hover{
+background:#555;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h1>AfterLife System</h1>
+</header>
+
+<nav>
+<a href="/">Головна</a>
+<a href="/services">Послуги</a>
+<a href="/profile">Профіль</a>
+</nav>
+
+<div class="box">
+
+<h2>✔ Послугу успішно активовано</h2>
+
+<div class="info">
+
+{% if service == "guide" %}
+<p>👤 Провідник призначений.</p>
+<p>Він допоможе тобі адаптуватися після переходу.</p>
+
+{% elif service == "boiler" %}
+<p>🔥 Котел успішно заброньовано.</p>
+<p>Місце підготовлено згідно параметрів.</p>
+
+{% else %}
+<p>Послугу активовано.</p>
+{% endif %}
+
+</div>
+
+<a href="/services">
+<button>Замовити ще послугу</button>
+</a>
+
+<a href="/profile">
+<button class="secondary">Перейти у профіль</button>
+</a>
+
+</div>
+
+</body>
+</html>

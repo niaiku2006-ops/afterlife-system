@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тест долі</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #0b0b0b;
+    color: white;
+}
+
+header {
+    background: #111;
+    padding: 20px;
+    text-align: center;
+}
+
+nav {
+    background: #151515;
+    padding: 10px;
+    text-align: center;
+}
+
+nav a {
+    color: #ccc;
+    margin: 0 15px;
+    text-decoration: none;
+}
+
+nav a:hover {
+    color: #b3a1ff;
+}
+
+.box {
+    background: #1a1a1a;
+    margin: 50px auto;
+    padding: 20px;
+    max-width: 700px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.info {
+    background: #111;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: #ccc;
+}
+
+button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    width: 80%;
+    cursor: pointer;
+    background: #b3a1ff;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 15px;
+}
+
+button:hover {
+    background: #9a87ff;
+}
+
+.secondary {
+    background: #333;
+}
+
+.secondary:hover {
+    background: #555;
+}
+
+.result-box {
+    white-space: pre-line;
+    font-size: 20px;
+    margin-top: 20px;
+    line-height: 1.6;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>Тест долі</h1>
+</header>
+
+<nav>
+<a href="/">Головна</a>
+<a href="/services">Послуги</a>
+<a href="/profile">Профіль</a>
+</nav>
+
+<div class="box">
+    <h2>💀 Жорсткий тест долі</h2>
+
+    <div class="info">
+        <p>Повторна спроба коштує <b>{{ test_price }}</b> душ.</p>
+        <p>У тебе зараз: <b>{{ user[5] }}</b> душ.</p>
+    </div>
+
+    <p id="question"></p>
+    <div id="answers"></div>
+    <div id="result" class="result-box"></div>
+
+    <a href="/repeat_test" id="paidRepeatLink" style="display:none; text-decoration:none;">
+        <button type="button">Повторити спробу офіційно (-{{ test_price }} душ)</button>
+    </a>
+
+    <a href="/profile" id="profileBack" style="display:none; text-decoration:none;">
+        <button type="button" class="secondary">Повернутись у профіль</button>
+    </a>
+</div>
+
+<script>
+const allQuestions = [
+{q:"Ти бачиш, як касир дав зайві гроші",a:["Повертаю 😇","Сумніваюсь 😅","Мовчу 😐","Забираю 😎","Дякую долі 😈"]},
+{q:"Тобі дзвонить невідомий номер",a:["Ввічливо відповідаю 😇","Слухаю 😅","Ігнор 😐","Скидаю 😎","Блокую 😈"]},
+{q:"Ти бачиш чергу, але дуже спішиш",a:["Стаю в чергу 😇","Питаю 😅","Обходжу 😐","Лізу вперед 😎","Прикидаюсь знайомим 😈"]},
+{q:"Тобі пише людина, якій ти винен гроші",a:["Віддаю 😇","Кажу завтра 😅","Ігнор 😐","Вимикаю телефон 😎","Блокую 😈"]},
+{q:"Ти бачиш чужий телефон без нагляду",a:["Не чіпаю 😇","Дивлюсь 😅","Перевіряю 😐","Фоткаюсь 😎","Забираю 😈"]},
+{q:"В інтернеті суперечка",a:["Спокійно пояснюю 😇","Жартую 😅","Сперечаюсь 😐","Тролю 😎","Розпалюю війну 😈"]},
+{q:"Тобі сказали 'це секрет'",a:["Мовчу 😇","Одному другу 😅","Парі людей 😐","Всім 😎","Пост в телеграм 😈"]},
+{q:"Ти запізнився на зустріч",a:["Вибачаюсь 😇","Пояснюю 😅","Мовчу 😐","Кажу пробки 😎","Звинувачую інших 😈"]},
+{q:"Ти бачиш, як хтось помилився",a:["Допомагаю 😇","Підказую 😅","Мовчу 😐","Сміюсь 😎","Підставляю 😈"]},
+{q:"Ти отримав премію",a:["Відкладу 😇","Куплю щось корисне 😅","Потрачу 😐","Все витрачу 😎","Ще й позичу 😈"]},
+{q:"Тобі написали 'нам треба поговорити'",a:["Спокійно 😇","Трохи хвилююсь 😅","Паніка 😐","Ігнор 😎","Зникаю 😈"]},
+{q:"Ти бачиш останнє місце в транспорті",a:["Запропоную іншому 😇","Сяду 😅","Швидко сяду 😐","Біжу 😎","Штовхаюсь 😈"]},
+{q:"Тобі пишуть у 3 ночі",a:["Відповідаю 😇","Зранку 😅","Ігнор 😐","Злюсь 😎","Блокую 😈"]},
+{q:"Ти знайшов чужий гаманець",a:["Шукаю власника 😇","Передам 😅","Залишу 😐","Заберу гроші 😎","Все заберу 😈"]},
+{q:"Тобі сказали 'безкоштовно'",a:["Не беру 😇","Сумніваюсь 😅","Беру 😐","Беру два 😎","Беру все 😈"]},
+{q:"Друг просить допомогу переїжджати",a:["Допомагаю 😇","Приїду 😅","Шукаю відмазку 😐","Зайнятий 😎","Пропадаю 😈"]},
+{q:"Wi-Fi пропав",a:["Спокійно 😇","Сумно 😅","Паніка 😐","Жах 😎","Кінець світу 😈"]},
+{q:"Ти отримав негативний коментар",a:["Ігнор 😇","Спокійно відповідаю 😅","Сперечаюсь 😐","Грублю 😎","Воюю 😈"]},
+{q:"Хтось їсть твою їжу",a:["Поділюсь 😇","Натякну 😅","Заберу 😐","Злюсь 😎","Помщуся 😈"]},
+{q:"Ти бачиш кнопку 'не натискати'",a:["Не натискаю 😇","Думаю 😅","Натисну 😐","Натисну двічі 😎","Зламаю 😈"]}
+];
+
+let questions = [];
+let score = 0;
+let step = 0;
+
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+function startTest() {
+    questions = shuffle([...allQuestions]).slice(0, 7);
+    score = 0;
+    step = 0;
+
+    document.getElementById("result").innerText = "";
+    document.getElementById("paidRepeatLink").style.display = "none";
+    document.getElementById("profileBack").style.display = "none";
+
+    showQuestion();
+}
+
+function showQuestion() {
+    document.getElementById("question").innerText = questions[step].q;
+
+    let btns = "";
+    questions[step].a.forEach((ans, i) => {
+        btns += `<button onclick="answer(${i})">${ans}</button>`;
+    });
+
+    document.getElementById("answers").innerHTML = btns;
+}
+
+function answer(val) {
+    score += val;
+    step++;
+
+    if (step < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function getResultText(score) {
+    if (score <= 4) {
+        return "😇 Ти занадто ідеальний... Підозріло.\nТест вважає, що ти перебільшив свою святість.";
+    } else if (score <= 10) {
+        return "🙂 Нормальний результат. У тебе є і світла, і темна сторона.";
+    } else if (score <= 16) {
+        return "😏 Є підозра, що ти мутний персонаж.";
+    } else if (score <= 22) {
+        return "😈 Тобі вже гріють місце в пеклі.";
+    } else {
+        return "💀 Дуже темний результат. Демони аплодують стоячи.";
+    }
+}
+
+function saveResultToProfile(text) {
+    fetch("/save_test_result", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "result=" + encodeURIComponent(text)
+    })
+    .then(response => response.text())
+    .then(data => {
+        console.log("Результат збережено:", data);
+    })
+    .catch(error => {
+        console.log("Помилка збереження результату:", error);
+    });
+}
+
+function showResult() {
+    const text = getResultText(score);
+
+    document.getElementById("question").innerText = "Результат:";
+    document.getElementById("answers").innerHTML = "";
+    document.getElementById("result").innerText = text;
+
+    document.getElementById("paidRepeatLink").style.display = "inline-block";
+    document.getElementById("profileBack").style.display = "inline-block";
+
+    saveResultToProfile(text);
+}
+
+startTest();
+</script>
+
+</body>
+</html>

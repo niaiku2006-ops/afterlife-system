@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Профіль</title>
+<style>
+body { margin:0; font-family: Arial; background:#0b0b0b; color:white; }
+header { background:#111; padding:20px; text-align:center; }
+nav { background:#151515; padding:10px; text-align:center; }
+nav a { color:#ccc; margin:0 15px; text-decoration:none; }
+nav a:hover { color:#b3a1ff; }
+.box { background:#1a1a1a; margin:50px auto; padding:20px; max-width:650px; border-radius:10px; text-align:center; }
+img { border-radius:50%; margin-bottom:15px; width:120px; height:120px; object-fit:cover; }
+input { display:block; margin:10px auto; padding:10px; width:80%; background:#111; border:none; color:white; border-radius:5px; }
+button { display:block; margin:10px auto; padding:10px; width:80%; cursor:pointer; background:#b3a1ff; border:none; border-radius:5px; color:white; }
+button:hover { background:#9a87ff; }
+.service-list { list-style:none; padding:0; margin:20px 0 0 0; }
+.service-item { background:#111; margin:10px auto; padding:15px; width:80%; border-radius:8px; text-align: left; box-sizing: border-box; border-left: 4px solid #b3a1ff; }
+.service-name { font-weight: bold; font-size: 16px; color: #fff; }
+.service-date { margin-top: 5px; font-size: 14px; color: #b3a1ff; }
+.result-box { background:#111; margin:15px auto 25px auto; padding:15px; width:80%; border-radius:8px; white-space:pre-line; line-height:1.5; }
+hr { border:none; height:1px; background:#333; margin:20px 0; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>Твій профіль</h1>
+</header>
+
+<nav>
+    <a href="/">Головна</a>
+    <a href="/services">Послуги</a>
+    <a href="/profile">Профіль</a>
+</nav>
+
+<div class="box">
+    {% if user[4] %}
+        <img src="/static/avatars/{{user[4]}}">
+    {% else %}
+        <img src="https://i.imgur.com/6VBx3io.png">
+    {% endif %}
+
+    <h2>{{ user[3] }}</h2>
+    <p>😈 Душі: {{ user[5] }}</p>
+
+    {% if session.get("admin") %}
+        <hr>
+        <h3>Адмін</h3>
+        <a href="/admin"><button>Адмін панель</button></a>
+    {% endif %}
+
+    <hr>
+    <h3>🧪 Останній результат тесту</h3>
+    {% if user[6] %}
+        <div class="result-box">{{ user[6] }}</div>
+    {% else %}
+        <p>Ти ще не проходив тест.</p>
+    {% endif %}
+
+    <h3>Змінити профіль</h3>
+    <form method="POST" enctype="multipart/form-data">
+        <input name="nickname" placeholder="Новий нікнейм" value="{{ user[3] }}">
+        <input type="file" name="avatar">
+        <button>Зберегти</button>
+    </form>
+
+    <hr>
+    <h3>✨ Мої доступні послуги після смерті</h3>
+    {% if services %}
+        <ul class="service-list">
+            {% for s in services %}
+                <li class="service-item">
+                    <div class="service-name">📋 {{ s[2] }}</div>
+                    {% if s[4] %}
+                        <div class="service-date">📅 Заброньовано на: <b>{{ s[4] }}</b></div>
+                    {% else %}
+                        <div class="service-date" style="color: #666;">📅 Час не вказано</div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>У тебе поки немає куплених послуг.</p>
+    {% endif %}
+
+    <br>
+    <a href="/logout"><button style="background: #ff5c5c;">Вийти</button></a>
+</div>
+
+</body>
+</html>
