@@ -111,13 +111,25 @@ def login():
     return render_template("login.html")
 
 
-@app.route("/profile")
+@app.route("/profile", methods=["GET", "POST"])
 def profile():
     if "user_id" not in session:
         return redirect("/login")
 
     conn = get_connection()
     c = conn.cursor()
+
+    # ОНОВЛЕНО: Якщо прийшов POST-запит (натиснули кнопку зміни аватарки)
+    if request.method == "POST":
+        new_avatar = request.form.get("avatar")
+        if new_avatar:
+            c.execute(
+                "UPDATE users SET avatar=? WHERE id=?",
+                (new_avatar, session["user_id"]),
+            )
+            conn.commit()
+
+    # Отримуємо свіжі дані користувача для відображення
     c.execute("SELECT * FROM users WHERE id=?", (session["user_id"],))
     user = c.fetchone()
 
@@ -134,7 +146,6 @@ def test():
         return redirect("/login")
 
     if request.method == "POST":
-        # Логіка підрахунку гріхів на основі відповідей з форми тестів
         score = 0
         for i in range(1, 6):
             answer = request.form.get(f"q{i}")
