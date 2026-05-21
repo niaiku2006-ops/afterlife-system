@@ -260,6 +260,5 @@ def logout():
     return redirect("/")
 
 
-# Для локального тестування (на Vercel цей блок ігнорується)
 if __name__ == "__main__":
     app.run(debug=True)
