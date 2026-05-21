@@ -8,7 +8,7 @@
 <style>
 body {
     margin: 0;
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background: #0b0b0b;
     color: white;
 }
@@ -17,16 +17,23 @@ header {
     background: #111;
     padding: 20px;
     text-align: center;
+    border-bottom: 1px solid #333;
+}
+
+header h1 {
+    margin: 0;
+    color: #b3a1ff;
 }
 
 nav {
     background: #151515;
     padding: 10px;
     text-align: center;
+    border-bottom: 1px solid #222;
 }
 
 nav a {
-    color: #ccc;
+    color: #ffffff;
     margin: 0 15px;
     text-decoration: none;
 }
@@ -38,10 +45,11 @@ nav a:hover {
 .box {
     background: #1a1a1a;
     margin: 50px auto;
-    padding: 20px;
+    padding: 30px;
     max-width: 700px;
     border-radius: 10px;
     text-align: center;
+    box-shadow: 0 0 15px rgba(179, 161, 255, 0.05);
 }
 
 .info {
@@ -49,188 +57,119 @@ nav a:hover {
     padding: 12px;
     border-radius: 8px;
     margin-bottom: 20px;
-    color: #ccc;
 }
 
-button {
-    display: block;
-    margin: 10px auto;
-    padding: 10px;
-    width: 80%;
-    cursor: pointer;
+.btn {
     background: #b3a1ff;
-    border: none;
-    border-radius: 5px;
     color: white;
-    font-size: 15px;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 10px;
+    transition: background 0.2s;
 }
 
-button:hover {
+.btn:hover {
     background: #9a87ff;
 }
 
-.secondary {
-    background: #333;
-}
-
-.secondary:hover {
-    background: #555;
-}
-
-.result-box {
-    white-space: pre-line;
-    font-size: 20px;
+#answers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     margin-top: 20px;
-    line-height: 1.6;
 }
 </style>
 </head>
-
 <body>
 
 <header>
-<h1>Тест долі</h1>
+    <h1>Тест визначення долі</h1>
 </header>
 
 <nav>
-<a href="/">Головна</a>
-<a href="/services">Послуги</a>
-<a href="/profile">Профіль</a>
+    <a href="/">Про нас</a>
+    <a href="/services">Послуги</a>
+    <a href="/profile">Профіль</a>
 </nav>
 
 <div class="box">
-    <h2>💀 Жорсткий тест долі</h2>
-
-    <div class="info">
-        <p>Повторна спроба коштує <b>{{ test_price }}</b> душ.</p>
-        <p>У тебе зараз: <b>{{ user[5] }}</b> душ.</p>
+    <div id="quiz">
+        <div class="info" id="question-info">Запитання 1 з 5</div>
+        <h2 id="question">Завантаження запитання...</h2>
+        <div id="answers"></div>
     </div>
-
-    <p id="question"></p>
-    <div id="answers"></div>
-    <div id="result" class="result-box"></div>
-
-    <a href="/repeat_test" id="paidRepeatLink" style="display:none; text-decoration:none;">
-        <button type="button">Повторити спробу офіційно (-{{ test_price }} душ)</button>
-    </a>
-
-    <a href="/profile" id="profileBack" style="display:none; text-decoration:none;">
-        <button type="button" class="secondary">Повернутись у профіль</button>
-    </a>
+    <div id="result-box" style="display: none;">
+        <h2>Ваш вердикт потойбіччя</h2>
+        <p id="result-text" style="font-size: 18px; margin: 20px 0; line-height: 1.5;"></p>
+        <a href="/profile"><button class="btn">Перейти в профіль</button></a>
+    </div>
 </div>
 
 <script>
-const allQuestions = [
-{q:"Ти бачиш, як касир дав зайві гроші",a:["Повертаю 😇","Сумніваюсь 😅","Мовчу 😐","Забираю 😎","Дякую долі 😈"]},
-{q:"Тобі дзвонить невідомий номер",a:["Ввічливо відповідаю 😇","Слухаю 😅","Ігнор 😐","Скидаю 😎","Блокую 😈"]},
-{q:"Ти бачиш чергу, але дуже спішиш",a:["Стаю в чергу 😇","Питаю 😅","Обходжу 😐","Лізу вперед 😎","Прикидаюсь знайомим 😈"]},
-{q:"Тобі пише людина, якій ти винен гроші",a:["Віддаю 😇","Кажу завтра 😅","Ігнор 😐","Вимикаю телефон 😎","Блокую 😈"]},
-{q:"Ти бачиш чужий телефон без нагляду",a:["Не чіпаю 😇","Дивлюсь 😅","Перевіряю 😐","Фоткаюсь 😎","Забираю 😈"]},
-{q:"В інтернеті суперечка",a:["Спокійно пояснюю 😇","Жартую 😅","Сперечаюсь 😐","Тролю 😎","Розпалюю війну 😈"]},
-{q:"Тобі сказали 'це секрет'",a:["Мовчу 😇","Одному другу 😅","Парі людей 😐","Всім 😎","Пост в телеграм 😈"]},
-{q:"Ти запізнився на зустріч",a:["Вибачаюсь 😇","Пояснюю 😅","Мовчу 😐","Кажу пробки 😎","Звинувачую інших 😈"]},
-{q:"Ти бачиш, як хтось помилився",a:["Допомагаю 😇","Підказую 😅","Мовчу 😐","Сміюсь 😎","Підставляю 😈"]},
-{q:"Ти отримав премію",a:["Відкладу 😇","Куплю щось корисне 😅","Потрачу 😐","Все витрачу 😎","Ще й позичу 😈"]},
-{q:"Тобі написали 'нам треба поговорити'",a:["Спокійно 😇","Трохи хвилююсь 😅","Паніка 😐","Ігнор 😎","Зникаю 😈"]},
-{q:"Ти бачиш останнє місце в транспорті",a:["Запропоную іншому 😇","Сяду 😅","Швидко сяду 😐","Біжу 😎","Штовхаюсь 😈"]},
-{q:"Тобі пишуть у 3 ночі",a:["Відповідаю 😇","Зранку 😅","Ігнор 😐","Злюсь 😎","Блокую 😈"]},
-{q:"Ти знайшов чужий гаманець",a:["Шукаю власника 😇","Передам 😅","Залишу 😐","Заберу гроші 😎","Все заберу 😈"]},
-{q:"Тобі сказали 'безкоштовно'",a:["Не беру 😇","Сумніваюсь 😅","Беру 😐","Беру два 😎","Беру все 😈"]},
-{q:"Друг просить допомогу переїжджати",a:["Допомагаю 😇","Приїду 😅","Шукаю відмазку 😐","Зайнятий 😎","Пропадаю 😈"]},
-{q:"Wi-Fi пропав",a:["Спокійно 😇","Сумно 😅","Паніка 😐","Жах 😎","Кінець світу 😈"]},
-{q:"Ти отримав негативний коментар",a:["Ігнор 😇","Спокійно відповідаю 😅","Сперечаюсь 😐","Грублю 😎","Воюю 😈"]},
-{q:"Хтось їсть твою їжу",a:["Поділюсь 😇","Натякну 😅","Заберу 😐","Злюсь 😎","Помщуся 😈"]},
-{q:"Ти бачиш кнопку 'не натискати'",a:["Не натискаю 😇","Думаю 😅","Натисну 😐","Натисну двічі 😎","Зламаю 😈"]}
+const questions = [
+    { q: "Як часто ви допомагали іншим безкорисливо?", a: ["Завжди, коли міг", "Іноді", "Рідко", "Ніколи"], s: [0, 2, 4, 6] },
+    { q: "Чи забирали ви останній шматок піци, не спитавши?", a: ["Ні, я ж не монстр", "Бувало...", "Завжди так роблю", "Я забирав разом із коробкою"], s: [0, 2, 5, 6] },
+    { q: "Що ви робите, якщо бачите центурійну чергу?", a: ["Чесно стою", "Шукаю обхідні шляхи", "Пролажу з криком 'мені тільки спитати!'", "Створюю нову чергу попереду"], s: [0, 2, 4, 6] },
+    { q: "Ваше ставлення до котиків?", a: ["Обожнюю", "Нейтральне", "Не дуже люблю", "Я пес"], s: [0, 2, 4, 5] },
+    { q: "Чи шкодуєте ви про свої земні вчинки?", a: ["Про абсолютно всі гріхи", "Про деякі", "Трохи", "Ні про що не шкодую, повторив би!"], s: [0, 2, 4, 6] }
 ];
 
-let questions = [];
+let currentQuestion = 0;
 let score = 0;
-let step = 0;
 
-function shuffle(array) {
-    return array.sort(() => Math.random() - 0.5);
-}
-
-function startTest() {
-    questions = shuffle([...allQuestions]).slice(0, 7);
-    score = 0;
-    step = 0;
-
-    document.getElementById("result").innerText = "";
-    document.getElementById("paidRepeatLink").style.display = "none";
-    document.getElementById("profileBack").style.display = "none";
-
-    showQuestion();
-}
-
-function showQuestion() {
-    document.getElementById("question").innerText = questions[step].q;
-
-    let btns = "";
-    questions[step].a.forEach((ans, i) => {
-        btns += `<button onclick="answer(${i})">${ans}</button>`;
-    });
-
-    document.getElementById("answers").innerHTML = btns;
-}
-
-function answer(val) {
-    score += val;
-    step++;
-
-    if (step < questions.length) {
-        showQuestion();
-    } else {
+function loadQuestion() {
+    if (currentQuestion >= questions.length) {
         showResult();
+        return;
     }
+    const qData = questions[currentQuestion];
+    document.getElementById("question-info").innerText = `Запитання ${currentQuestion + 1} з ${questions.length}`;
+    document.getElementById("question").innerText = qData.q;
+    
+    const answersDiv = document.getElementById("answers");
+    answersDiv.innerHTML = "";
+    
+    qData.a.forEach((ans, index) => {
+        const btn = document.createElement("button");
+        btn.className = "btn";
+        btn.innerText = ans;
+        btn.onclick = () => {
+            score += qData.s[index];
+            currentQuestion++;
+            loadQuestion();
+        };
+        answersDiv.appendChild(btn);
+    });
 }
 
 function getResultText(score) {
-    if (score <= 4) {
-        return "😇 Ти занадто ідеальний... Підозріло.\nТест вважає, що ти перебільшив свою святість.";
-    } else if (score <= 10) {
-        return "🙂 Нормальний результат. У тебе є і світла, і темна сторона.";
-    } else if (score <= 16) {
-        return "😏 Є підозра, що ти мутний персонаж.";
-    } else if (score <= 22) {
-        return "😈 Тобі вже гріють місце в пеклі.";
-    } else {
-        return "💀 Дуже темний результат. Демони аплодують стоячи.";
-    }
+    if (score <= 5) return "😇 Ти занадто ідеальний... Система вважає, що ти перебільшив свою святість на землі.";
+    if (score <= 12) return "🙂 Нормальний результат. У тобі гармонійно співіснують і світла, і темна сторони.";
+    if (score <= 18) return "😏 Є велика підозра, що ти хитрий і мутний персонаж.";
+    if (score <= 25) return "😈 Тобі вже щосили гріють персональне місце в котлі.";
+    return "💀 Дуже темна душа. Демони нижчих кіл аплодують твоїй біографії стоячи.";
 }
 
 function saveResultToProfile(text) {
     fetch("/save_test_result", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: "result=" + encodeURIComponent(text)
-    })
-    .then(response => response.text())
-    .then(data => {
-        console.log("Результат збережено:", data);
-    })
-    .catch(error => {
-        console.log("Помилка збереження результату:", error);
     });
 }
 
 function showResult() {
-    const text = getResultText(score);
-
-    document.getElementById("question").innerText = "Результат:";
-    document.getElementById("answers").innerHTML = "";
-    document.getElementById("result").innerText = text;
-
-    document.getElementById("paidRepeatLink").style.display = "inline-block";
-    document.getElementById("profileBack").style.display = "inline-block";
-
-    saveResultToProfile(text);
+    document.getElementById("quiz").style.display = "none";
+    const resultText = getResultText(score);
+    document.getElementById("result-text").innerText = resultText;
+    document.getElementById("result-box").style.display = "block";
+    saveResultToProfile(resultText);
 }
 
-startTest();
+loadQuestion();
 </script>
-
 </body>
 </html>
