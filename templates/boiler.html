@@ -32,7 +32,7 @@ nav{
 }
 
 nav a{
-    color:#ccc;
+    color:#ffffff;
     margin:0 15px;
     text-decoration:none;
 }
@@ -51,69 +51,61 @@ main{
     margin:0 auto;
     padding:25px;
     border-radius:12px;
-    box-shadow:0 0 10px rgba(179,161,255,0.2);
+    box-shadow:0 0 15px rgba(179,161,255,0.1);
 }
 
 h2{
-    margin-top:0;
     color:#b3a1ff;
-    text-align:center;
+    margin-top:0;
 }
 
-p{
-    text-align:center;
+form{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+    margin-top:20px;
 }
 
 label{
-    display:block;
-    margin-top:15px;
-    margin-bottom:8px;
+    font-weight:bold;
     color:#ccc;
 }
 
-select,
-input{
-    width:100%;
+select, input{
     padding:12px;
-    border:none;
-    border-radius:6px;
     background:#111;
+    border:1px solid #333;
     color:white;
-    box-sizing:border-box;
+    border-radius:6px;
+    font-size:15px;
+}
+
+select:focus, input:focus{
+    border-color:#b3a1ff;
+    outline:none;
 }
 
 button{
-    width:100%;
-    margin-top:20px;
-    padding:12px;
+    padding:14px;
     background:#b3a1ff;
+    color:white;
     border:none;
     border-radius:6px;
-    color:white;
     cursor:pointer;
     font-size:16px;
+    font-weight:bold;
+    transition:background 0.2s;
+    margin-top:10px;
 }
 
 button:hover{
     background:#9a87ff;
 }
 
-.info{
-    margin-top:20px;
-    padding:15px;
-    background:#111;
-    border-radius:8px;
-    color:#bbb;
+.desc{
+    color:#aaa;
     font-size:14px;
     line-height:1.5;
-}
-
-footer{
-    text-align:center;
-    padding:10px;
-    background:#111;
-    border-top:1px solid #444;
-    margin-top:30px;
 }
 </style>
 </head>
@@ -138,28 +130,21 @@ footer{
             <label for="boiler_type">Тип котла</label>
             <select name="boiler_type" id="boiler_type" required>
                 <option value="standard">Standard — 30 душ за 1 день</option>
-                <option value="vip">VIP — 60 душ за 1 день</option>
+                <option value="vip">VIP — 60 душ за 1 day</option>
             </select>
 
             <label for="days">Кількість днів</label>
-            <input type="number" name="days" id="days" min="1" value="1" required>
+            <input type="number" name="days" id="days" min=\"1\" value=\"1\" required>
 
             <label for="booking_time">Дата та час початку оренди</label>
             <input type="datetime-local" name="booking_time" id="booking_time" required>
 
-            <button type="submit">Продовжити</button>
-        </form>
+            <p class="desc">Після натискання кнопки «Забронювати», кошти будуть списані з вашого балансу автоматично, а послуга з'явиться у вашому профілі.</p>
 
-        <div class="info">
-            Після натискання кнопки тебе перекине на сторінку підтвердження,
-            де буде показано остаточну ціну бронювання.
-        </div>
+            <button type="submit">Забронювати котел</button>
+        </form>
     </div>
 </main>
-
-<footer>
-    <p>© 2026 AfterLife System</p>
-</footer>
 
 </body>
 </html>
