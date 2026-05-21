@@ -4,17 +4,14 @@ from datetime import datetime
 from flask import Flask, redirect, render_template, request, session
 
 app = Flask(__name__)
-# Секретний ключ для роботи сесій (авторизації користувачів)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
 
 def get_connection():
-    # КРИТИЧНО ДЛЯ VERCEL: створюємо базу в єдиній папці, куди дозволено запис
     return sqlite3.connect("/tmp/users.db")
 
 
 def init_db():
-    """Функція автоматичного створення таблиць, якщо їх немає в базі"""
     conn = get_connection()
     c = conn.cursor()
     c.execute(
@@ -45,7 +42,6 @@ def init_db():
     conn.close()
 
 
-# Запускаємо ініціалізацію бази даних при кожному старті додатка
 init_db()
 
 
@@ -119,17 +115,24 @@ def profile():
     conn = get_connection()
     c = conn.cursor()
 
-    # ОНОВЛЕНО: Якщо прийшов POST-запит (натиснули кнопку зміни аватарки)
     if request.method == "POST":
         new_avatar = request.form.get("avatar")
+        new_nickname = request.form.get("nickname")
+
         if new_avatar:
             c.execute(
                 "UPDATE users SET avatar=? WHERE id=?",
                 (new_avatar, session["user_id"]),
             )
-            conn.commit()
 
-    # Отримуємо свіжі дані користувача для відображення
+        if new_nickname:
+            c.execute(
+                "UPDATE users SET nickname=? WHERE id=?",
+                (new_nickname, session["user_id"]),
+            )
+
+        conn.commit()
+
     c.execute("SELECT * FROM users WHERE id=?", (session["user_id"],))
     user = c.fetchone()
 
