@@ -4,29 +4,31 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, session, url_for, g
 
 app = Flask(__name__)
+# Секретний ключ для шифрування сесій користувачів
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
 DB_PATH = "afterlife.db"
 
 def get_db():
-    """Створює підключення до БД з класичними цифровими індексами для HTML."""
+    """Створює та повертає підключення до БД з класичними цифровими індексами."""
     if 'db' not in g:
         g.db = sqlite3.connect(DB_PATH, check_same_thread=False)
     return g.db
 
 @app.teardown_appcontext
 def close_db(error):
-    """Автоматично закриває базу після кожного запиту."""
+    """Автоматично закриває з'єднання з базою після кожного запиту."""
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
 def init_db():
-    """Ініціалізація бази даних. Створює таблиці та перших користувачів."""
+    """Ініціалізація бази даних. Створює таблиці та дефолтних юзерів один раз."""
     with app.app_context():
         db = get_db()
         c = db.cursor()
         
+        # Створення таблиці користувачів за індексами:
         # u[0]=id, u[1]=username, u[2]=password, u[3]=nickname, u[4]=avatar, u[5]=souls, u[6]=last_result
         c.execute('''
             CREATE TABLE IF NOT EXISTS users (
@@ -40,6 +42,8 @@ def init_db():
             )
         ''')
         
+        # Створення таблиці послуг:
+        # s[0]=id, s[1]=user_id, s[2]=name, s[3]=used, s[4]=booking_date
         c.execute('''
             CREATE TABLE IF NOT EXISTS services (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,6 +54,7 @@ def init_db():
             )
         ''')
         
+        # Якщо таблиця порожня — додаємо адміна та тестового грішника
         c.execute("SELECT COUNT(*) FROM users")
         if c.fetchone()[0] == 0:
             c.execute("INSERT INTO users (id, username, password, nickname, avatar, souls) VALUES (1, 'Admin', 'admin123', 'Адміністратор', 'default.png', 500)")
@@ -143,7 +148,7 @@ def guide():
             
             cost_per_hour = 20 if guide_type == 'basic' else 40
             total_cost = cost_per_hour * hours
-            service_title = f"Провідник {guide_type.upper()} ({hours} god.)"
+            service_title = f"Провідник {guide_type.upper()} ({hours} год.)"
             
             try:
                 dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
@@ -179,13 +184,19 @@ def admin():
     db = get_db()
     c = db.cursor()
     
-    # Таблиця юзерів для admin.html
+    # Вибірка користувачів під індекси в admin.html:
+    # u[0]=id, u[1]=username, u[2]=password, u[3]=nickname, u[4]=avatar, u[5]=souls
     c.execute("SELECT id, username, password, nickname, avatar, souls FROM users")
     users = c.fetchall()
     
-    # Таблиця послуг, адаптована під індекси s[1], s[4], s[5] в admin.html
-    c.execute("SELECT id, user_id, used, used, name, booking_date FROM services WHERE used = 0")
-    active_services = c.fetchall()
+    # Спеціальна підготовка активних послуг для сумісності з логікою в admin.html
+    c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE used = 0")
+    raw_services = c.fetchall()
+    
+    # Перетворюємо під фейкові розширені кортежі, де s[1] — це user_id, s[4] — це name, s[5] — це booking_date, як очікує шаблон
+    active_services = []
+    for s in raw_services:
+        active_services.append((s[0], s[1], s[3], s[3], s[2], s[4]))
     
     return render_template('admin.html', users=users, active_services=active_services)
 
@@ -215,13 +226,14 @@ def register():
         # Зчитуємо поля ТОЧНО за атрибутами name з твого register.html
         username = request.form.get('username')
         password = request.form.get('password')
-        email_field = request.form.get('email')  # Твій email з HTML
+        email_field = request.form.get('email')
         
+        # Перестраховка: якщо поля пусті, не даємо базі впасти з помилкою 500
         if not username or not password:
             return "Будь ласка, заповніть Username та Пароль! ❌"
             
         # Оскільки в базі є обов'язкове поле nickname, а в HTML його немає,
-        # ми запишемо туди email або логін користувача, щоб база не падала.
+        # ми запишемо туди email або логін користувача
         nickname = email_field if email_field and email_field.strip() != "" else username
         
         db = get_db()
@@ -229,12 +241,12 @@ def register():
         try:
             c.execute(
                 "INSERT INTO users (username, password, nickname, avatar, souls, last_result) VALUES (?, ?, ?, 'default.png', 100, '')",
-                (username, password, nickname)
+                (username.strip(), password.strip(), nickname.strip())
             )
             db.commit()
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
-            return "Користувач з таким логіном вже існує в Книзі Доль! 💀"
+            return "Користувач з таким логіном вже існує в Книзі Доль! 💀 Спробуйте інший."
         except Exception as e:
             return f"Помилка бази даних при реєстрації: {e}", 500
             
@@ -256,6 +268,7 @@ def login():
             session['user_id'] = user[0]
             session['username'] = user[1]
             
+            # Якщо логін admin або god — надаємо права адміністратора
             if user[1].lower() in ['god', 'admin']:
                 session['admin'] = True
                 
@@ -278,6 +291,8 @@ def profile():
             c.execute("UPDATE users SET nickname=? WHERE id=?", (new_nickname, session['user_id']))
             db.commit()
             
+    # Вибірка чітко під індекси у твоєму profile.html:
+    # user[3] = нікнейм, user[4] = аватар, user[5] = душі, user[6] = результат тесту
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users WHERE id=?", (session['user_id'],))
     user = c.fetchone()
     
@@ -285,6 +300,7 @@ def profile():
         session.clear()
         return redirect(url_for('login'))
     
+    # Вибірка послуг під індекси у profile.html (s[2] - назва послуги, s[4] - дата)
     c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id=?", (session['user_id'],))
     user_services = c.fetchall()
     
@@ -296,5 +312,12 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
+    # Автоматичне виправлення: якщо файл БД застряг у старій помилковій структурі, ми видалимо його
+    if os.path.exists(DB_PATH):
+        try:
+            os.remove(DB_PATH)
+        except:
+            pass
+            
     init_db()
     app.run(debug=True)
