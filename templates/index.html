@@ -9,54 +9,43 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    /* Створюємо пекельний фоновий візерунок з Черепами, ТЦК та Черепашками-ніндзя */
-    background-color: #050505;
-    background-image: linear-gradient(rgba(11, 11, 11, 0.95), rgba(11, 11, 11, 0.95)), 
-                      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Ctext x='10' y='30' fill='%23222' font-size='22' font-family='Arial'%3E💀%3C/text%3E%3Ctext x='90' y='40' fill='%231d1a2f' font-weight='bold' font-size='18' font-family='sans-serif'%3ETЦK%3C/text%3E%3Ctext x='40' y='90' fill='%231a281a' font-size='22'%3E🐢🥷%3C/text%3E%3Ctext x='110' y='120' fill='%23222' font-size='24'%3E💀%3C/text%3E%3C/svg%3E");
+    /* Твій оригінальний колір фону + малюнок черепашок-ніндзя, що повторюється */
+    background-color: #0b0b0b;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ctext x='45' y='65' fill='%231b2d1b' font-size='25'%3E🐢🥷%3C/text%3E%3C/svg%3E");
     color: #e0e0e0;
     line-height: 1.6;
 }
 
 header {
-    background: rgba(17, 17, 17, 0.9);
-    padding: 40px 20px;
+    background: #111;
+    padding: 30px 20px;
     text-align: center;
-    border-bottom: 2px solid #b3a1ff;
-    box-shadow: 0 4px 20px rgba(179, 161, 255, 0.1);
+    border-bottom: 1px solid #333;
 }
 
 header h1 {
     margin: 0;
     color: #b3a1ff;
-    font-size: 42px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    text-shadow: 0 0 10px rgba(179, 161, 255, 0.5);
+    font-size: 36px;
 }
 
 nav {
-    background: rgba(21, 21, 21, 0.9);
-    padding: 15px;
+    background: #151515;
+    padding: 12px;
     text-align: center;
     border-bottom: 1px solid #222;
-    backdrop-filter: blur(5px);
 }
 
 nav a {
-    color: #ffffff;
-    margin: 0 20px;
+    color: #ffffff; /* Чистий білий колір для посилань */
+    margin: 0 15px;
     text-decoration: none;
-    font-size: 18px;
-    font-weight: bold;
-    transition: all 0.3s ease;
-    padding: 5px 10px;
-    border-radius: 4px;
+    font-size: 16px;
+    transition: color 0.2s;
 }
 
 nav a:hover {
-    color: #050505;
-    background: #b3a1ff;
-    box-shadow: 0 0 15px rgba(179, 161, 255, 0.6);
+    color: #b3a1ff;
 }
 
 main {
@@ -66,37 +55,21 @@ main {
 }
 
 .section {
-    background: rgba(26, 26, 26, 0.85);
-    padding: 30px;
-    margin-bottom: 35px;
-    border-radius: 12px;
-    border: 1px solid #2a2a2a;
-    backdrop-filter: blur(5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s ease;
-}
-
-.section:hover {
-    transform: translateY(-5px);
-    border-color: #b3a1ff;
+    background: #1a1a1a;
+    padding: 25px;
+    margin-bottom: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(179, 161, 255, 0.05);
 }
 
 h2 {
     margin-top: 0;
     color: #b3a1ff;
-    font-size: 24px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 10px;
 }
 
-/* ФІКС: Прибрали фіолетовий колір-посилання. Тепер це просто красивий акцентний білий текст */
 .highlight {
-    color: #ffffff;
+    color: #b3a1ff;
     font-weight: bold;
-    background: rgba(179, 161, 255, 0.15);
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid rgba(179, 161, 255, 0.3);
 }
 
 ul {
@@ -104,18 +77,7 @@ ul {
 }
 
 li {
-    margin-bottom: 12px;
-    position: relative;
-    list-style: none;
-}
-
-/* Кастомні маркери списку у вигляді маленьких черепків */
-li::before {
-    content: "💀";
-    position: absolute;
-    left: -25px;
-    top: 0;
-    font-size: 14px;
+    margin-bottom: 8px;
 }
 </style>
 </head>
@@ -150,10 +112,10 @@ li::before {
             Кожна душа має власний рівень, який визначається на основі рішень, дій та життєвого досвіду.
         </p>
         <p>
-            На сайті використовується система <span class="highlight">душ</span> — це показник духовного розвитку.
+            Найти використовується система <span class="highlight">душ</span> — це показатель духовного розвитку.
         </p>
         <p>
-            Чим більше душ, тим більше можливостей відкривається:
+            Чим більше душ, тим більше можливостей відкриватися:
         </p>
         <ul>
             <li>доступ до додаткових сервісів</li>
