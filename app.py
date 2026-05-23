@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import base64
+import random  # Модуль для генерації випадкових чисел
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.utils import secure_filename
@@ -140,7 +141,7 @@ def guide():
             
             cost_per_hour = 20 if guide_type == 'basic' else 40
             total_cost = cost_per_hour * hours
-            service_title = f"Провідник {guide_type.upper()} ({hours} god.)"
+            service_title = f"Провідник {guide_type.upper()} ({hours} год.)"
             
             try:
                 dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
@@ -218,11 +219,14 @@ def register():
             
         final_nickname = nickname if nickname and nickname.strip() != "" else username
             
+        # ОНОВЛЕНО: Тепер генеруємо випадкове число душ від 6 до 777
+        random_souls = random.randint(6, 777)
+            
         conn = get_connection()
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO users (username, password, nickname, avatar, souls, last_result) VALUES (?, ?, ?, 'default.png', 100, '')",
-                      (username.strip(), password.strip(), final_nickname.strip()))
+            c.execute("INSERT INTO users (username, password, nickname, avatar, souls, last_result) VALUES (?, ?, ?, 'default.png', ?, '')",
+                      (username.strip(), password.strip(), final_nickname.strip(), random_souls))
             conn.commit()
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
@@ -271,7 +275,6 @@ def profile():
             if 'avatar' in request.files:
                 file = request.files['avatar']
                 if file and file.filename != '' and allowed_file(file.filename):
-                    # ФІКС: Конвертуємо файл в рядок Base64 замість збереження на диск
                     file_bytes = file.read()
                     encoded_string = base64.b64encode(file_bytes).decode('utf-8')
                     mime_type = file.mimetype
