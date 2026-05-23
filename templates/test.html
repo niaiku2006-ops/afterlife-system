@@ -3,90 +3,110 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тест долі</title>
-
+<title>Тест Долі - AfterLife System</title>
 <style>
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #0b0b0b;
-    color: white;
+    background-color: #0b0b0b;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ctext x='45' y='65' fill='%231b2d1b' font-size='25'%3E🐢🥷%3C/text%3E%3C/svg%3E");
+    color: #e0e0e0;
+    line-height: 1.6;
 }
-
 header {
     background: #111;
-    padding: 20px;
+    padding: 30px 20px;
     text-align: center;
     border-bottom: 1px solid #333;
 }
-
 header h1 {
     margin: 0;
     color: #b3a1ff;
+    font-size: 36px;
 }
-
 nav {
     background: #151515;
-    padding: 10px;
+    padding: 12px;
     text-align: center;
     border-bottom: 1px solid #222;
 }
-
 nav a {
     color: #ffffff;
     margin: 0 15px;
     text-decoration: none;
+    font-size: 16px;
+    transition: color 0.2s;
 }
-
 nav a:hover {
     color: #b3a1ff;
 }
-
 .box {
     background: #1a1a1a;
-    margin: 50px auto;
+    margin: 40px auto;
     padding: 30px;
-    max-width: 700px;
+    max-width: 650px;
     border-radius: 10px;
+    box-shadow: 0 0 10px rgba(179, 161, 255, 0.05);
     text-align: center;
-    box-shadow: 0 0 15px rgba(179, 161, 255, 0.05);
 }
-
-.info {
-    background: #111;
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-
 .btn {
+    display: inline-block;
     background: #b3a1ff;
-    color: white;
+    color: #111;
+    padding: 12px 30px;
     border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
     border-radius: 5px;
-    margin: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: 20px;
     transition: background 0.2s;
 }
-
 .btn:hover {
     background: #9a87ff;
 }
-
-#answers {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.btn:disabled {
+    background: #444;
+    color: #888;
+    cursor: not-allowed;
+}
+.warning {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px dashed #ff6b6b;
+    margin-top: 15px;
+}
+.quiz-container {
+    display: none;
+    text-align: left;
     margin-top: 20px;
+}
+.question {
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+.answers label {
+    display: block;
+    background: #222;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid #333;
+}
+.answers label:hover {
+    border-color: #b3a1ff;
 }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>Тест визначення долі</h1>
+    <h1>Тест Визначення Долі</h1>
 </header>
 
 <nav>
@@ -95,81 +115,97 @@ nav a:hover {
     <a href="/profile">Профіль</a>
 </nav>
 
-<div class="box">
-    <div id="quiz">
-        <div class="info" id="question-info">Запитання 1 з 5</div>
-        <h2 id="question">Завантаження запитання...</h2>
-        <div id="answers"></div>
-    </div>
-    <div id="result-box" style="display: none;">
-        <h2>Ваш вердикт потойбіччя</h2>
-        <p id="result-text" style="font-size: 18px; margin: 20px 0; line-height: 1.5;"></p>
-        <a href="/profile"><button class="btn">Перейти в профіль</button></a>
-    </div>
+<div class="box" id="start-box">
+    <h2>Перевірка духовного рівня</h2>
+    <p>Цей тест проаналізує ваші гріхи та чесноти, щоб визначити ваше точне місце в AfterLife System.</p>
+    
+    <p style="font-size: 18px;">Ваш поточний баланс: <b style="color: #b3a1ff;">😈 {{ user_souls }} душ</b></p>
+    <p>Вартість проходження тесту: <b>50 душ</b>.</p>
+
+    {% if user_souls >= 50 %}
+        <button class="btn" onclick="startQuiz()">Оплатити та розпочати (50 душ 😈)</button>
+    {% else %}
+        <button class="btn" disabled>Недостатньо душ</button>
+        <div class="warning">
+            💀 У вас недостатньо душ для оплати тесту! Зверніться до Адміністратора, щоб поповнити баланс.
+        </div>
+    {% endif %}
+</div>
+
+<div class="box quiz-container" id="quiz-box">
+    <div class="question" id="q-text">Завантаження питання...</div>
+    <div class="answers" id="q-answers"></div>
+    <button class="btn" onclick="nextQuestion()" id="next-btn" style="width: 100%;">Далі</button>
 </div>
 
 <script>
+// Прості демонстраційні питання для тесту
 const questions = [
-    { q: "Як часто ви дивитесь контент 18+?", a: ["Завжди, коли міг", "Іноді", "Рідко", "Ніколи"], s: [0, 2, 4, 6] },
-    { q: "Ви збрехали на попереднє питання?", a: ["Ні", "Частково", "Скоріше так", "Так"], s: [0, 2, 5, 6] },
-    { q: "Вам соромно за те, що збрехали?", a: ["Каюсь", "Соромно", "Ні", "ІДІ НАХ*Й"], s: [0, 2, 4, 6] },
-    { q: "Тобі так сильно хотілось сказати іді нах*й?", a: ["Ні, я би так не зробив", "Було бажання", "Це дуже сильна спокуса", "ІДІ НАХ*Й"], s: [0, 2, 4, 5] },
-    { q: "Збити бабку чи дитину?", a: ["Я врятую обох", "Дитину", "Бабку", "Від мене ніхто не втече)))"], s: [0, 2, 4, 6] }
+    { q: "Який ваш головний земний гріх?", a: ["Гординя", "Лінь", "Жадібність", "Я святий!"] },
+    { q: "Куди б ви хотіли потрапити?", a: ["В елітний котел з Wi-Fi", "На хмаринку грати на арфі", "Назад на Землю", "Мені байдуже"] }
 ];
 
-let currentQuestion = 0;
+let currentIdx = 0;
 let score = 0;
 
-function loadQuestion() {
-    if (currentQuestion >= questions.length) {
-        showResult();
+function startQuiz() {
+    document.getElementById('start-box').style.display = 'none';
+    document.getElementById('quiz-box').style.display = 'block';
+    showQuestion();
+}
+
+function showQuestion() {
+    let q = questions[currentIdx];
+    document.getElementById('q-text').innerText = `${currentIdx + 1}. ${q.q}`;
+    
+    let answersDiv = document.getElementById('q-answers');
+    answersDiv.innerHTML = '';
+    
+    q.a.forEach((ans, i) => {
+        answersDiv.innerHTML += `
+            <label>
+                <input type="radio" name="ans" value="${i}"> ${ans}
+            </label>
+        `;
+    });
+}
+
+function nextQuestion() {
+    let selected = document.querySelector('input[name="ans"]:checked');
+    if (!selected) {
+        alert("Оберіть варіант відповіді грішника!");
         return;
     }
-    const qData = questions[currentQuestion];
-    document.getElementById("question-info").innerText = `Запитання ${currentQuestion + 1} з ${questions.length}`;
-    document.getElementById("question").innerText = qData.q;
     
-    const answersDiv = document.getElementById("answers");
-    answersDiv.innerHTML = "";
+    currentIdx++;
+    if (currentIdx < questions.length) {
+        showQuestion();
+    } else {
+        finishQuiz();
+    }
+}
+
+function finishQuiz() {
+    document.getElementById('quiz-box').innerHTML = "<h3>Обробка результатів у Книзі Доль...</h3>";
     
-    qData.a.forEach((ans, index) => {
-        const btn = document.createElement("button");
-        btn.className = "btn";
-        btn.innerText = ans;
-        btn.onclick = () => {
-            score += qData.s[index];
-            currentQuestion++;
-            loadQuestion();
-        };
-        answersDiv.appendChild(btn);
+    // Відправляємо фінальний результат на сервер, де також спишеться 50 душ
+    let formData = new FormData();
+    formData.append('result', 'Визначено рівень: Середній грішник (Котел №3)');
+
+    fetch('/save_test_result', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('quiz-box').innerHTML = `
+            <h2>Тест завершено!</h2>
+            <p>${data}</p>
+            <a href="/profile" class="btn">Перейти в Профіль</a>
+        `;
     });
 }
-
-function getResultText(score) {
-    if (score <= 5) return "😇 Ти занадто ідеальний... Система вважає, що ти перебільшив свою святість на землі.";
-    if (score <= 12) return "🙂 Нормальний результат. У тобі гармонійно співіснують і світла, і темна сторони.";
-    if (score <= 18) return "😏 Є велика підозра, що ти хитрий і мутний персонаж.";
-    if (score <= 25) return "😈 Тобі вже щосили гріють персональне місце в котлі.";
-    return "💀 Дуже темна душа. Демони нижчих кіл аплодують твоїй біографії стоячи.";
-}
-
-function saveResultToProfile(text) {
-    fetch("/save_test_result", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "result=" + encodeURIComponent(text)
-    });
-}
-
-function showResult() {
-    document.getElementById("quiz").style.display = "none";
-    const resultText = getResultText(score);
-    document.getElementById("result-text").innerText = resultText;
-    document.getElementById("result-box").style.display = "block";
-    saveResultToProfile(resultText);
-}
-
-loadQuestion();
 </script>
+
 </body>
 </html>
