@@ -7,13 +7,10 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
-# Налаштування для завантаження аватарок
-UPLOAD_FOLDER = os.path.join('static', 'uploads')
+# ФІКС: Завантажуємо аватарки ОДРАЗУ в готову папку static
+UPLOAD_FOLDER = 'static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# Створюємо папку для аватарок, якщо її немає
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -39,7 +36,6 @@ def get_connection():
         )
     ''')
     
-    # Структура послуг: s[0]=id, s[1]=user_id, s[2]=name, s[3]=used, s[4]=booking_date
     c.execute('''
         CREATE TABLE IF NOT EXISTS services (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -145,7 +141,7 @@ def guide():
             
             cost_per_hour = 20 if guide_type == 'basic' else 40
             total_cost = cost_per_hour * hours
-            service_title = f"Провідник {guide_type.upper()} ({hours} god.)"
+            service_title = f"Провідник {guide_type.upper()} ({hours} год.)"
             
             try:
                 dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
@@ -216,12 +212,11 @@ def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        nickname = request.form.get('nickname') # Повертаємо логіку на чистий нікнейм
+        nickname = request.form.get('nickname')
         
         if not username or not password:
             return "Будь ласка, заповніть логін та пароль!"
             
-        # Якщо нікнейм порожній — даємо йому ім'я юзернейму (а не пошту!)
         final_nickname = nickname if nickname and nickname.strip() != "" else username
             
         conn = get_connection()
@@ -273,16 +268,15 @@ def profile():
             c.execute("UPDATE users SET nickname=? WHERE id=?", (new_nickname, session['user_id']))
             conn.commit()
             
-        # ОБРОБКА ЗАВАНТАЖЕННЯ АВАТАРА
+        # ОБРОБКА ЗАВАНТАЖЕННЯ АВАТАРА НАПРЯМУ В STATIC
         if 'avatar' in request.files:
             file = request.files['avatar']
             if file and file.filename != '' and allowed_file(file.filename):
-                # Робимо унікальне ім'я файлу на основі ID користувача
                 ext = file.filename.rsplit('.', 1)[1].lower()
                 filename = secure_filename(f"avatar_{session['user_id']}.{ext}")
+                # Зберігаємо файл прямо в папку static
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 
-                # Оновлюємо ім'я файлу аватара в базі даних
                 c.execute("UPDATE users SET avatar=? WHERE id=?", (filename, session['user_id']))
                 conn.commit()
             
@@ -293,7 +287,7 @@ def profile():
         session.clear()
         return redirect(url_for('login'))
     
-    c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id=?", (session['user_id'],))
+    c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id?", (session['user_id'],))
     user_services = c.fetchall()
     
     return render_template('profile.html', user=user, services=user_services)
