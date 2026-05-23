@@ -75,15 +75,30 @@ def test():
 def save_test_result():
     if 'user_id' not in session:
         return "Потрібна авторизація", 401
+    
     user_id = session['user_id']
     result_text = request.form.get('result', 'Невідомий результат')
+    test_cost = 50  # Вартість проходження тесту
     
     try:
         conn = get_connection()
         c = conn.cursor()
-        c.execute("UPDATE users SET last_result=? WHERE id=?", (result_text, user_id))
-        conn.commit()
-        return "Успішно збережено!"
+        
+        # Перевіряємо, скільки душ є у грішника
+        c.execute("SELECT souls FROM users WHERE id=?", (user_id,))
+        row = c.fetchone()
+        user_souls = row[0] if row else 0
+        
+        # Перевірка на платоспроможність душ
+        if user_souls >= test_cost:
+            new_souls = user_souls - test_cost
+            # Знімаємо 50 душ і записуємо результат тесту
+            c.execute("UPDATE users SET souls=?, last_result=? WHERE id=?", (new_souls, result_text, user_id))
+            conn.commit()
+            return f"Результат збережено! З вашого рахунку списано {test_cost} душ. 😈"
+        else:
+            return "У вас недостатньо душ, щоб дізнатися свою долю! Проходження тесту коштує 50 душ. 💀", 403
+            
     except Exception as e:
         return f"Помилка збереження тесту: {e}", 500
 
@@ -219,7 +234,7 @@ def register():
             
         final_nickname = nickname if nickname and nickname.strip() != "" else username
             
-        # ОНОВЛЕНО: Тепер генеруємо випадкове число душ від 6 до 777
+        # Генеруємо випадкове число душ від 6 до 777
         random_souls = random.randint(6, 777)
             
         conn = get_connection()
