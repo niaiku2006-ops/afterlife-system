@@ -36,16 +36,16 @@ button:hover { background:#9a87ff; }
 </nav>
 
 <div class="box">
-    <img src="{{ url_for('static', filename='uploads/' + user[4]) }}" alt="Аватар">
+    <img src="{{ url_for('static', filename=user[4]) }}" alt="Аватар">
 
     <h2>{{ user[3] }}</h2>
     <p>😈 Душі: {{ user[5] }}</p>
 
-    {% if session.get("admin") %}\
-        <hr>\
-        <h3>Адмін</h3>\
-        <a href="/admin"><button>Адмін панель</button></a>\
-    {% endif %}\
+    {% if session.get("admin") %}
+        <hr>
+        <h3>Адмін</h3>
+        <a href="/admin"><button>Адмін панель</button></a>
+    {% endif %}
 
     <hr>
     <h3>🧪 Останній результат тесту</h3>
