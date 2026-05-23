@@ -139,14 +139,12 @@ nav a:hover {
 </div>
 
 <script>
-// Прості демонстраційні питання для тесту
 const questions = [
     { q: "Який ваш головний земний гріх?", a: ["Гординя", "Лінь", "Жадібність", "Я святий!"] },
     { q: "Куди б ви хотіли потрапити?", a: ["В елітний котел з Wi-Fi", "На хмаринку грати на арфі", "Назад на Землю", "Мені байдуже"] }
 ];
 
 let currentIdx = 0;
-let score = 0;
 
 function startQuiz() {
     document.getElementById('start-box').style.display = 'none';
@@ -188,7 +186,6 @@ function nextQuestion() {
 function finishQuiz() {
     document.getElementById('quiz-box').innerHTML = "<h3>Обробка результатів у Книзі Доль...</h3>";
     
-    // Відправляємо фінальний результат на сервер, де також спишеться 50 душ
     let formData = new FormData();
     formData.append('result', 'Визначено рівень: Середній грішник (Котел №3)');
 
