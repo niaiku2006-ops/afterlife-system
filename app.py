@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
-# Налаштування папки для завантаження — використовуємо твою готову папку static
+# НАЛАШТУВАННЯ: завантажуємо файли одразу в готову папку static
 UPLOAD_FOLDER = 'static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -15,15 +15,16 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Використовуємо базу даних у пам'яті
+# Створюємо підключення до бази в пам'яті
 _SHARED_CONN = sqlite3.connect(":memory:", check_same_thread=False)
 
 def get_connection():
-    """Створює таблиці з чітко визначеною структурою колонок."""
+    """Гарантовано створює правильну структуру таблиць у базі даних."""
     conn = _SHARED_CONN
     c = conn.cursor()
     
-    # Структура: id(0), username(1), password(2), nickname(3), avatar(4), souls(5), last_result(6)
+    # Таблиця users (всього 7 колонок)
+    # Порядок: id(0), username(1), password(2), nickname(3), avatar(4), souls(5), last_result(6)
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,7 +37,7 @@ def get_connection():
         )
     ''')
     
-    # Структура послуг
+    # Таблиця послуг
     c.execute('''
         CREATE TABLE IF NOT EXISTS services (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,7 +48,7 @@ def get_connection():
         )
     ''')
     
-    # Створення тестових користувачів, якщо база порожня
+    # Створюємо дефолтних користувачів, якщо база чиста
     c.execute("SELECT COUNT(*) FROM users")
     if c.fetchone()[0] == 0:
         c.execute("INSERT INTO users (id, username, password, nickname, avatar, souls, last_result) VALUES (1, 'Admin', 'admin123', 'Адміністратор', 'default.png', 500, '')")
@@ -177,7 +178,7 @@ def admin():
         
     conn = get_connection()
     c = conn.cursor()
-    # Вибираємо всі 7 колонок для уникнення помилок індексів в admin.html
+    # Запитуємо всі колонки, щоб уникнути помилок індексів у шаблоні admin.html
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users")
     users = c.fetchall()
     
@@ -219,6 +220,7 @@ def register():
         if not username or not password:
             return "Будь ласка, заповніть логін та пароль!"
             
+        # Якщо нікнейм порожній — даємо значення юзернейму
         final_nickname = nickname if nickname and nickname.strip() != "" else username
             
         conn = get_connection()
@@ -266,12 +268,13 @@ def profile():
     
     if request.method == 'POST':
         try:
+            # 1. Оновлення нікнейму
             new_nickname = request.form.get('nickname')
             if new_nickname:
                 c.execute("UPDATE users SET nickname=? WHERE id=?", (new_nickname, session['user_id']))
                 conn.commit()
                 
-            # Перевіряємо наявність завантаженого файлу аватара
+            # 2. Обробка файлу аватара
             if 'avatar' in request.files:
                 file = request.files['avatar']
                 if file and file.filename != '' and allowed_file(file.filename):
@@ -279,16 +282,16 @@ def profile():
                     # Робимо унікальне ім'я файлу на основі id користувача
                     filename = secure_filename(f"avatar_{session['user_id']}.{ext}")
                     
-                    # Перевіряємо чи папка static існує, і зберігаємо туди
-                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                    # Зберігаємо файл безпосередньо у папку static
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                     
-                    # Оновлюємо поле аватара в базі даних
+                    # Оновлюємо назву аватара в базі даних
                     c.execute("UPDATE users SET avatar=? WHERE id=?", (filename, session['user_id']))
                     conn.commit()
         except Exception as e:
-            return f"Помилка обробки форми профілю: {e}", 500
+            return f"Помилка при збереженні профілю: {e}", 500
             
+    # Отримуємо свіжі дані користувача для відображення
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users WHERE id=?", (session['user_id'],))
     user = c.fetchone()
     
@@ -296,6 +299,7 @@ def profile():
         session.clear()
         return redirect(url_for('login'))
     
+    # Отримуємо сервіси користувача
     c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id=?", (session['user_id'],))
     user_services = c.fetchall()
     
