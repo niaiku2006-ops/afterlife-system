@@ -11,7 +11,7 @@ nav { background:#151515; padding:10px; text-align:center; }
 nav a { color:#ccc; margin:0 15px; text-decoration:none; }
 nav a:hover { color:#b3a1ff; }
 .box { background:#1a1a1a; margin:50px auto; padding:20px; max-width:650px; border-radius:10px; text-align:center; }
-img { border-radius:50%; margin-bottom:15px; width:120px; height:120px; object-fit:cover; }
+img { border-radius:50%; margin-bottom:15px; width:120px; height:120px; object-fit:cover; border: 2px solid #b3a1ff; }
 input { display:block; margin:10px auto; padding:10px; width:80%; background:#111; border:none; color:white; border-radius:5px; }
 button { display:block; margin:10px auto; padding:10px; width:80%; cursor:pointer; background:#b3a1ff; border:none; border-radius:5px; color:white; }
 button:hover { background:#9a87ff; }
@@ -36,7 +36,11 @@ button:hover { background:#9a87ff; }
 </nav>
 
 <div class="box">
-    <img src="{{ url_for('static', filename=user[4]) }}" alt="Аватар">
+    {% if user[4].startswith('data:') %}
+        <img src="{{ user[4] }}" alt="Аватар">
+    {% else %}
+        <img src="{{ url_for('static', filename=user[4]) }}" alt="Аватар">
+    {% endif %}
 
     <h2>{{ user[3] }}</h2>
     <p>😈 Душі: {{ user[5] }}</p>
