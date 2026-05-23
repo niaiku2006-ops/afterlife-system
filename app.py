@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import base64
-import random  # Модуль для генерації випадкових чисел
+import random
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.utils import secure_filename
@@ -69,7 +69,15 @@ def services():
 def test():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('test.html')
+        
+    # Дізнаємося актуальний баланс душ користувача для відображення на сторінці тесту
+    conn = get_connection()
+    c = conn.cursor()
+    c.execute("SELECT souls FROM users WHERE id=?", (session['user_id'],))
+    row = c.fetchone()
+    user_souls = row[0] if row else 0
+    
+    return render_template('test.html', user_souls=user_souls)
 
 @app.route('/save_test_result', methods=['POST'])
 def save_test_result():
@@ -234,7 +242,7 @@ def register():
             
         final_nickname = nickname if nickname and nickname.strip() != "" else username
             
-        # Генеруємо випадкове число душ від 6 до 777
+        # Рандомна кількість душ від 6 до 777
         random_souls = random.randint(6, 777)
             
         conn = get_connection()
