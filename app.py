@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
-# ФІКС: Завантажуємо аватарки ОДРАЗУ в готову папку static
+# Працюємо ОДРАЗУ з готовою паркою static (як на твоїх скріншотах)
 UPLOAD_FOLDER = 'static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -19,11 +19,11 @@ def allowed_file(filename):
 _SHARED_CONN = sqlite3.connect(":memory:", check_same_thread=False)
 
 def get_connection():
-    """Повертає підключення, ГАРАНТОВАНО створюючи таблиці чіткої структури."""
+    """Повертає підключення, ГАРАНТОВАНО створюючи таблиці з правильним порядком колонок."""
     conn = _SHARED_CONN
     c = conn.cursor()
     
-    # Структура користувача: u[0]=id, u[1]=username, u[2]=password, u[3]=nickname, u[4]=avatar, u[5]=souls, u[6]=last_result
+    # Таблиця користувачів: id=0, username=1, password=2, nickname=3, avatar=4, souls=5, last_result=6
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,6 +36,7 @@ def get_connection():
         )
     ''')
     
+    # Таблиця послуг
     c.execute('''
         CREATE TABLE IF NOT EXISTS services (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,7 +47,7 @@ def get_connection():
         )
     ''')
     
-    # Тестові користувачі
+    # Дефолтні користувачі (якщо база порожня)
     c.execute("SELECT COUNT(*) FROM users")
     if c.fetchone()[0] == 0:
         c.execute("INSERT OR IGNORE INTO users (id, username, password, nickname, avatar, souls, last_result) VALUES (1, 'Admin', 'admin123', 'Адміністратор', 'default.png', 500, '')")
@@ -268,13 +269,12 @@ def profile():
             c.execute("UPDATE users SET nickname=? WHERE id=?", (new_nickname, session['user_id']))
             conn.commit()
             
-        # ОБРОБКА ЗАВАНТАЖЕННЯ АВАТАРА НАПРЯМУ В STATIC
+        # Завантаження аватара прямо в корінь static
         if 'avatar' in request.files:
             file = request.files['avatar']
             if file and file.filename != '' and allowed_file(file.filename):
                 ext = file.filename.rsplit('.', 1)[1].lower()
                 filename = secure_filename(f"avatar_{session['user_id']}.{ext}")
-                # Зберігаємо файл прямо в папку static
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 
                 c.execute("UPDATE users SET avatar=? WHERE id=?", (filename, session['user_id']))
@@ -287,7 +287,8 @@ def profile():
         session.clear()
         return redirect(url_for('login'))
     
-    c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id?", (session['user_id'],))
+    # ФІКС: додано пропущений знак "=" у запиті до сервісів (id користувача)
+    c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id=?", (session['user_id'],))
     user_services = c.fetchall()
     
     return render_template('profile.html', user=user, services=user_services)
