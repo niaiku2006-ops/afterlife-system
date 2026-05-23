@@ -4,41 +4,44 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, session, url_for, g
 
 app = Flask(__name__)
+# Ключ для роботи сесій
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
 DB_PATH = "afterlife.db"
 
 def get_db():
-    """Повертає підключення до БД з класичними цифровими індексами (для твоїх HTML)."""
+    """Створює підключення до БД з класичними індексами, як очікують твої HTML-файли."""
     if 'db' not in g:
         g.db = sqlite3.connect(DB_PATH, check_same_thread=False)
-        # Row factory НЕ використовуємо, бо твої шаблони написані під цифри: u[0], s[5] тощо.
     return g.db
 
 @app.teardown_appcontext
 def close_db(error):
-    """Автоматично закриває базу після виконання запиту."""
+    """Автоматично закриває базу після завершення кожного запиту."""
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
 def init_db():
-    """Ініціалізація бази даних один раз при запуску додатка."""
+    """Ініціалізація бази даних (створення таблиць) при запуску."""
     with app.app_context():
         db = get_db()
         c = db.cursor()
         
+        # Таблиця користувачів (u[0]=id, u[1]=username, u[2]=password, u[3]=nickname, u[4]=avatar, u[5]=souls, u[6]=last_result)
         c.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE,
                 password TEXT,
                 nickname TEXT,
-                avatar TEXT,
+                avatar TEXT DEFAULT 'default.png',
                 souls INTEGER DEFAULT 100,
-                last_result TEXT
+                last_result TEXT DEFAULT ''
             )
         ''')
+        
+        # Таблиця послуг (id, user_id, name, used, booking_date)
         c.execute('''
             CREATE TABLE IF NOT EXISTS services (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,7 +52,7 @@ def init_db():
             )
         ''')
         
-        # Автоматично створюємо тестових користувачів, якщо база порожня
+        # Створюємо дефолтних юзерів, якщо база абсолютно порожня
         c.execute("SELECT COUNT(*) FROM users")
         if c.fetchone()[0] == 0:
             c.execute("INSERT INTO users (id, username, password, nickname, avatar, souls) VALUES (1, 'Admin', 'admin123', 'Адміністратор', 'default.png', 500)")
@@ -119,10 +122,6 @@ def boiler():
             if user_souls >= total_cost:
                 new_souls = user_souls - total_cost
                 c.execute("UPDATE users SET souls=? WHERE id=?", (new_souls, session['user_id']))
-                # Структура таблиці services за твоїм шаблоном: 
-                # id(0), user_id(1), name(2), used(3), booking_date(4)
-                # УВАГА: В admin.html ти викликаєш s[4] як назву, а s[5] як дату!
-                # Щоб не ламати твій admin.html, ми запишемо дані у відповідні поля.
                 c.execute("INSERT INTO services (user_id, name, booking_date) VALUES (?, ?, ?)",
                           (session['user_id'], service_title, formatted_date))
                 db.commit()
@@ -183,21 +182,19 @@ def admin():
     db = get_db()
     c = db.cursor()
     
-    # Вибираємо користувачів точно під індекси в шаблоні:
+    # Вибираємо користувачів під індекси в admin.html:
     # u[0]=id, u[1]=username, u[2]=password, u[3]=nickname, u[4]=avatar, u[5]=souls
     c.execute("SELECT id, username, password, nickname, avatar, souls FROM users")
     users = c.fetchall()
     
-    # Для admin.html потрібен плаский список active_services, де:
-    # s[0]=id, s[1]=user_id, s[2]=??, s[3]=??, s[4]=name, s[5]=booking_date
-    # Оскільки в базі у нас структура інша (id, user_id, name, used, booking_date),
-    # ми робимо хитрий SELECT, щоб підігнати під твої індекси s[4] та s[5]:
+    # Для admin.html потрібен список active_services, де s[1]=user_id, s[4]=name, s[5]=booking_date
+    # Підганяємо пусті/додаткові поля через SELECT, щоб індекси збіглися з твоїм шаблоном
     c.execute("SELECT id, user_id, used, used, name, booking_date FROM services WHERE used = 0")
     active_services = c.fetchall()
     
     return render_template('admin.html', users=users, active_services=active_services)
 
-# Маршрути для кнопок в адмінці
+# Кнопка додати душі (+10 / +100) в адмінці
 @app.route('/give/<int:user_id>/<int:amount>')
 def give_souls(user_id, amount):
     if 'user_id' not in session or not session.get('admin'):
@@ -208,11 +205,12 @@ def give_souls(user_id, amount):
     db.commit()
     return redirect(url_for('admin'))
 
+# Кнопка "Виконано" для послуги в адмінці
 @app.route('/use_service/<int:service_id>')
 def use_service(service_id):
     if 'user_id' not in session or not session.get('admin'):
         return "Немає прав", 403
-    db = g.get('db', sqlite3.connect(DB_PATH))
+    db = get_db()
     c = db.cursor()
     c.execute("UPDATE services SET used = 1 WHERE id = ?", (service_id,))
     db.commit()
@@ -222,28 +220,39 @@ def use_service(service_id):
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
-        password = request.form.get('password')
-        nickname = request.form.get('nickname')
         
+        # ТВОЯ ПОМИЛКА БУЛА ТУТ: в register.html пароль може називатись "psw" або "password",
+        # а нікнейм береться з поля "email", якщо окремого "nickname" немає.
+        password = request.form.get('password') or request.form.get('psw')
+        nickname = request.form.get('nickname') or request.form.get('email')
+        
+        if not nickname:
+            nickname = username
+
         if not username or not password:
-            return "Будь ласка, заповніть логін та пароль!"
+            return "Будь ласка, заповніть і Username, і Пароль!"
             
         db = get_db()
         c = db.cursor()
         try:
-            c.execute("INSERT INTO users (username, password, nickname, avatar) VALUES (?, ?, ?, 'default.png')",
-                      (username, password, nickname if nickname else username))
+            c.execute(
+                "INSERT INTO users (username, password, nickname, avatar, souls, last_result) VALUES (?, ?, ?, 'default.png', 100, '')",
+                (username, password, nickname)
+            )
             db.commit()
             return redirect(url_for('login'))
         except sqlite3.IntegrityError:
             return "Користувач з таким логіном вже існує в Книзі Доль!"
+        except Exception as e:
+            return f"Помилка бази даних: {e}"
+            
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
-        password = request.form.get('password')
+        password = request.form.get('password') or request.form.get('psw')
         
         db = get_db()
         c = db.cursor()
@@ -277,6 +286,8 @@ def profile():
             c.execute("UPDATE users SET nickname=? WHERE id=?", (new_nickname, session['user_id']))
             db.commit()
             
+    # Вибірка чітко під індекси у твоєму profile.html:
+    # user[3] = нікнейм, user[4] = аватар, user[5] = душі, user[6] = результат тесту
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users WHERE id=?", (session['user_id'],))
     user = c.fetchone()
     
@@ -284,7 +295,7 @@ def profile():
         session.clear()
         return redirect(url_for('login'))
     
-    # Для profile.html структура s[2] - назва, s[4] - дата
+    # Вибірка послуг під індекси у profile.html (s[2] - назва, s[4] - дата)
     c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id=?", (session['user_id'],))
     user_services = c.fetchall()
     
@@ -296,5 +307,5 @@ def logout():
     return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    init_db()
+    init_db()  # Створюємо базу afterlife.db ОДИН раз перед запуском
     app.run(debug=True)
