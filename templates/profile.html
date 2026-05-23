@@ -15,41 +15,37 @@ img { border-radius:50%; margin-bottom:15px; width:120px; height:120px; object-f
 input { display:block; margin:10px auto; padding:10px; width:80%; background:#111; border:none; color:white; border-radius:5px; }
 button { display:block; margin:10px auto; padding:10px; width:80%; cursor:pointer; background:#b3a1ff; border:none; border-radius:5px; color:white; }
 button:hover { background:#9a87ff; }
-.service-list { list-style:none; padding:0; margin:20px 0 0 0; }
-.service-item { background:#111; margin:10px auto; padding:15px; width:80%; border-radius:8px; text-align: left; box-sizing: border-box; border-left: 4px solid #b3a1ff; }
-.service-name { font-weight: bold; font-size: 16px; color: #fff; }
-.service-date { margin-top: 5px; font-size: 14px; color: #b3a1ff; }
-.result-box { background:#111; margin:15px auto 25px auto; padding:15px; width:80%; border-radius:8px; white-space:pre-line; line-height:1.5; }
-hr { border:none; height:1px; background:#333; margin:20px 0; }
+.result-box { background:#222; padding:15px; border-radius:5px; border:1px dashed #b3a1ff; margin-top:10px; }
+.service-list { list-style:none; padding:0; text-align:left; max-width:500px; margin:20px auto; }
+.service-item { background:#222; padding:15px; margin-bottom:10px; border-radius:6px; border-left:4px solid #b3a1ff; }
+.service-name { font-weight:bold; font-size:16px; }
+.service-date { color:#aaa; font-size:13px; margin-top:5px; }
 </style>
 </head>
 <body>
 
 <header>
-    <h1>Твій профіль</h1>
+    <h1>Особистий Кабінет</h1>
 </header>
 
 <nav>
-    <a href="/">Головна</a>
+    <a href="/">Про нас</a>
     <a href="/services">Послуги</a>
     <a href="/profile">Профіль</a>
+    <a href="/logout" style="color:#ff6b6b;">Вихід</a>
 </nav>
 
 <div class="box">
-    {% if user[4] %}
-        <img src="/static/avatars/{{user[4]}}">
-    {% else %}
-        <img src="https://i.imgur.com/6VBx3io.png">
-    {% endif %}
+    <img src="{{ url_for('static', filename='uploads/' + user[4]) }}" alt="Аватар">
 
     <h2>{{ user[3] }}</h2>
     <p>😈 Душі: {{ user[5] }}</p>
 
-    {% if session.get("admin") %}
-        <hr>
-        <h3>Адмін</h3>
-        <a href="/admin"><button>Адмін панель</button></a>
-    {% endif %}
+    {% if session.get("admin") %}\
+        <hr>\
+        <h3>Адмін</h3>\
+        <a href="/admin"><button>Адмін панель</button></a>\
+    {% endif %}\
 
     <hr>
     <h3>🧪 Останній результат тесту</h3>
@@ -62,8 +58,8 @@ hr { border:none; height:1px; background:#333; margin:20px 0; }
     <h3>Змінити профіль</h3>
     <form method="POST" enctype="multipart/form-data">
         <input name="nickname" placeholder="Новий нікнейм" value="{{ user[3] }}">
-        <input type="file" name="avatar">
-        <button>Зберегти</button>
+        <input type="file" name="avatar" accept="image/*">
+        <button type="submit">Зберегти</button>
     </form>
 
     <hr>
@@ -76,17 +72,14 @@ hr { border:none; height:1px; background:#333; margin:20px 0; }
                     {% if s[4] %}
                         <div class="service-date">📅 Заброньовано на: <b>{{ s[4] }}</b></div>
                     {% else %}
-                        <div class="service-date" style="color: #666;">📅 Час не вказано</div>
+                        <div class="service-date" style="color:#ffb3a1;">📅 Дата не вказана</div>
                     {% endif %}
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>У тебе поки немає куплених послуг.</p>
+        <p>У вас немає активованих послуг.</p>
     {% endif %}
-
-    <br>
-    <a href="/logout"><button style="background: #ff5c5c;">Вийти</button></a>
 </div>
 
 </body>
