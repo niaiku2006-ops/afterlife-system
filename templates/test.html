@@ -1,112 +1,151 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тест Долі - AfterLife System</title>
-<style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #0b0b0b;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ctext x='45' y='65' fill='%231b2d1b' font-size='25'%3E🐢🥷%3C/text%3E%3C/svg%3E");
-    color: #e0e0e0;
-    line-height: 1.6;
-}
-header {
-    background: #111;
-    padding: 30px 20px;
-    text-align: center;
-    border-bottom: 1px solid #333;
-}
-header h1 {
-    margin: 0;
-    color: #b3a1ff;
-    font-size: 36px;
-}
-nav {
-    background: #151515;
-    padding: 12px;
-    text-align: center;
-    border-bottom: 1px solid #222;
-}
-nav a {
-    color: #ffffff;
-    margin: 0 15px;
-    text-decoration: none;
-    font-size: 16px;
-    transition: color 0.2s;
-}
-nav a:hover {
-    color: #b3a1ff;
-}
-.box {
-    background: #1a1a1a;
-    margin: 40px auto;
-    padding: 30px;
-    max-width: 650px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(179, 161, 255, 0.05);
-    text-align: center;
-}
-.btn {
-    display: inline-block;
-    background: #b3a1ff;
-    color: #111;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 5px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    text-decoration: none;
-    margin-top: 20px;
-    transition: background 0.2s;
-}
-.btn:hover {
-    background: #9a87ff;
-}
-.btn:disabled {
-    background: #444;
-    color: #888;
-    cursor: not-allowed;
-}
-.warning {
-    color: #ff6b6b;
-    background: rgba(255, 107, 107, 0.1);
-    padding: 15px;
-    border-radius: 5px;
-    border: 1px dashed #ff6b6b;
-    margin-top: 15px;
-}
-.quiz-container {
-    display: none;
-    text-align: left;
-    margin-top: 20px;
-}
-.question {
-    font-size: 18px;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-.answers label {
-    display: block;
-    background: #222;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    border: 1px solid #333;
-}
-.answers label:hover {
-    border-color: #b3a1ff;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест: Визначення твоєї долі</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0b0b;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Ctext x='45' y='65' fill='%231b2d1b' font-size='25'%3E🐢🥷%3C/text%3E%3C/svg%3E");
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #111;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #333;
+        }
+
+        header h1 {
+            margin: 0;
+            color: #b3a1ff;
+            font-size: 28px;
+        }
+
+        nav {
+            background-color: #151515;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #222;
+        }
+
+        nav a {
+            color: #ffffff;
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.2s;
+        }
+
+        nav a:hover {
+            color: #b3a1ff;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #1a1a1a;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            flex-grow: 1;
+        }
+
+        h2 {
+            color: #b3a1ff;
+            margin-top: 0;
+        }
+
+        .btn {
+            background-color: #b3a1ff;
+            color: #111;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #9a87ff;
+        }
+
+        .btn:disabled {
+            background-color: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .warning {
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px dashed #ff6b6b;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .question {
+            display: none;
+        }
+
+        .question.active {
+            display: block;
+        }
+
+        .options {
+            margin-top: 20px;
+        }
+
+        .option-btn {
+            display: block;
+            width: 100%;
+            background-color: #252525;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: #303030;
+            border-color: #b3a1ff;
+        }
+
+        #result {
+            display: none;
+            text-align: center;
+        }
+
+        .soul-balance {
+            font-size: 18px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 
 <header>
-    <h1>Тест Визначення Долі</h1>
+    <h1>Потойбічна Система Тестування</h1>
 </header>
 
 <nav>
@@ -115,93 +154,132 @@ nav a:hover {
     <a href="/profile">Профіль</a>
 </nav>
 
-<div class="box" id="start-box">
-    <h2>Перевірка духовного рівня</h2>
-    <p>Цей тест проаналізує ваші гріхи та чесноти, щоб визначити ваше точне місце в AfterLife System.</p>
-    
-    <p style="font-size: 18px;">Ваш поточний баланс: <b style="color: #b3a1ff;">😈 {{ user_souls }} душ</b></p>
-    <p>Вартість проходження тесту: <b>50 душ</b>.</p>
+<div class="container">
+    <div id="start-screen" style="text-align: center;">
+        <h2>Тест визначення твоєї долі</h2>
+        <p>Готовий дізнатися, що на тебе чекає на тому світі? Пройди цей чесний тест з 5 питань!</p>
+        <p class="soul-balance">Твій баланс: <b style="color: #b3a1ff;">😈 {{ user_souls }} душ</b></p>
+        <p>Вартість проходження: <b>50 душ</b></p>
+        
+        {% if user_souls >= 50 %}
+            <button class="btn" onclick="startQuiz()">Заплатити 50 душ та почати тест 😈</button>
+        {% else %}
+            <button class="btn" disabled>Недостатньо душ</button>
+            <div class="warning">
+                💀 Тобі не вистачає душ, щоб сплатити за тест! Попроси адміна підкинути валюти.
+            </div>
+        {% endif %}
+    </div>
 
-    {% if user_souls >= 50 %}
-        <button class="btn" onclick="startQuiz()">Оплатити та розпочати (50 душ 😈)</button>
-    {% else %}
-        <button class="btn" disabled>Недостатньо душ</button>
-        <div class="warning">
-            💀 У вас недостатньо душ для оплати тесту! Зверніться до Адміністратора, щоб поповнити баланс.
+    <div id="quiz-box" style="display: none;">
+        <div class="question active" id="q1">
+            <h2>1. Твоя улюблена страва на Землі?</h2>
+            <div class="options">
+                <button class="option-btn" onclick="selectOption(1, 'hell')">Шаурма з гострим соусом (Пекельний вибір)</button>
+                <button class="option-btn" onclick="selectOption(1, 'heaven')">Манна каша з кокосовим молоком</button>
+                <button class="option-btn" onclick="selectOption(1, 'purgatory')">Супчик від мами, але недосолений</button>
+            </div>
         </div>
-    {% endif %}
-</div>
 
-<div class="box quiz-container" id="quiz-box">
-    <div class="question" id="q-text">Завантаження питання...</div>
-    <div class="answers" id="q-answers"></div>
-    <button class="btn" onclick="nextQuestion()" id="next-btn" style="width: 100%;">Далі</button>
+        <div class="question" id="q2">
+            <h2>2. Що ти робиш, коли бачиш чергу?</h2>
+            <div class="options">
+                <button class="option-btn" onclick="selectOption(2, 'hell')">Влізаю нахабно наперед ("Мені тільки запитати!")</button>
+                <button class="option-btn" onclick="selectOption(2, 'heaven')">Смирно стою наприкінці та бажаю всім здоров'я</button>
+                <button class="option-btn" onclick="selectOption(2, 'purgatory')">Зітхаю, розвертаюсь і йду додому плакати</button>
+            </div>
+        </div>
+
+        <div class="question" id="q3">
+            <h2>3. Як ти ставишся до будильників на 6:00 ранку?</h2>
+            <div class="options">
+                <button class="option-btn" onclick="selectOption(3, 'hell')">Проклинаю винахідника і розбиваю телефон</button>
+                <button class="option-btn" onclick="selectOption(3, 'heaven')">Встаю з посмішкою, роблю зарядку і п'ю воду</button>
+                <button class="option-btn" onclick="selectOption(3, 'purgatory')">Переводжу ще на 5 хвилин... разів десять</button>
+            </div>
+        </div>
+
+        <div class="question" id="q4">
+            <h2>4. Твій ідеальний потойбічний транспорт?</h2>
+            <div class="options">
+                <button class="option-btn" onclick="selectOption(4, 'hell')">Тюнінгована дев'ятка без глушника, що палає</button>
+                <button class="option-btn" onclick="selectOption(4, 'heaven')">Пухнаста хмаринка з підігрівом сидіння</button>
+                <button class="option-btn" onclick="selectOption(4, 'purgatory')">Маршрутка Богдан, де завжди зайняті всі місця</button>
+            </div>
+        </div>
+
+        <div class="question" id="q5">
+            <h2>5. Якби ти став привидом, що б ти робив?</h2>
+            <div class="options">
+                <button class="option-btn" onclick="selectOption(5, 'hell')">Лякав людей у туалеті та крав шкарпетки</button>
+                <button class="option-btn" onclick="selectOption(5, 'heaven')">Допомагав студентам здавати сесію вночі</button>
+                <button class="option-btn" onclick="selectOption(5, 'purgatory')">Просто сидів би в інтернеті через чужий Wi-Fi</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="result">
+        <h2>Твою долю визначено!</h2>
+        <p id="result-text" style="font-size: 18px; font-weight: bold; margin: 20px 0; color: #b3a1ff;"></p>
+        <p id="server-response" style="color: #888; font-size: 14px;"></p>
+        <a href="/profile" class="btn" style="text-align: center; display: block;">Перейти до профілю</a>
+    </div>
 </div>
 
 <script>
-const questions = [
-    { q: "Який ваш головний земний гріх?", a: ["Гординя", "Лінь", "Жадібність", "Я святий!"] },
-    { q: "Куди б ви хотіли потрапити?", a: ["В елітний котел з Wi-Fi", "На хмаринку грати на арфі", "Назад на Землю", "Мені байдуже"] }
-];
+    let currentQuestion = 1;
+    let scores = { hell: 0, heaven: 0, purgatory: 0 };
 
-let currentIdx = 0;
-
-function startQuiz() {
-    document.getElementById('start-box').style.display = 'none';
-    document.getElementById('quiz-box').style.display = 'block';
-    showQuestion();
-}
-
-function showQuestion() {
-    let q = questions[currentIdx];
-    document.getElementById('q-text').innerText = `${currentIdx + 1}. ${q.q}`;
-    
-    let answersDiv = document.getElementById('q-answers');
-    answersDiv.innerHTML = '';
-    
-    q.a.forEach((ans, i) => {
-        answersDiv.innerHTML += `
-            <label>
-                <input type="radio" name="ans" value="${i}"> ${ans}
-            </label>
-        `;
-    });
-}
-
-function nextQuestion() {
-    let selected = document.querySelector('input[name="ans"]:checked');
-    if (!selected) {
-        alert("Оберіть варіант відповіді грішника!");
-        return;
+    function startQuiz() {
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('quiz-box').style.display = 'block';
     }
-    
-    currentIdx++;
-    if (currentIdx < questions.length) {
-        showQuestion();
-    } else {
-        finishQuiz();
+
+    function selectOption(qNum, type) {
+        scores[type]++;
+        
+        document.getElementById(`q${qNum}`).classList.remove('active');
+        currentQuestion++;
+        
+        if(currentQuestion <= 5) {
+            document.getElementById(`q${currentQuestion}`).classList.add('active');
+        } else {
+            calculateAndSendResult();
+        }
     }
-}
 
-function finishQuiz() {
-    document.getElementById('quiz-box').innerHTML = "<h3>Обробка результатів у Книзі Доль...</h3>";
-    
-    let formData = new FormData();
-    formData.append('result', 'Визначено рівень: Середній грішник (Котел №3)');
+    function calculateAndSendResult() {
+        document.getElementById('quiz-box').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('result-text').innerText = "Підраховуємо гріхи...";
 
-    fetch('/save_test_result', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('quiz-box').innerHTML = `
-            <h2>Тест завершено!</h2>
-            <p>${data}</p>
-            <a href="/profile" class="btn">Перейти в Профіль</a>
-        `;
-    });
-}
+        let finalVerdict = "";
+        if (scores.hell >= scores.heaven && scores.hell >= scores.purgatory) {
+            finalVerdict = "Тобі дорога в Пекло! Твій котел №4 вже закипає 🔥";
+        } else if (scores.heaven >= scores.hell && scores.heaven >= scores.purgatory) {
+            finalVerdict = "Чиста душа! На тебе чекає Рай та вічний безлімітний Wi-Fi ✨";
+        } else {
+            finalVerdict = "Ласкаво просимо до Чистилища. Будеш стояти в черзі на розподіл ⏳";
+        }
+
+        document.getElementById('result-text').innerText = finalVerdict;
+
+        // Надсилаємо результат на сервер у твій роут, де спишеться 50 душ
+        let formData = new FormData();
+        formData.append('result', finalVerdict);
+
+        fetch('/save_test_result', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.text())
+        .then(data => {
+            document.getElementById('server-response').innerText = data;
+        })
+        .catch(err => {
+            document.getElementById('server-response').innerText = "Помилка зв'язку з Книгою Доль.";
+        });
+    }
 </script>
 
 </body>
