@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import base64
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, session, url_for
 from werkzeug.utils import secure_filename
@@ -7,10 +8,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
 
-# НАЛАШТУВАННЯ: завантажуємо файли одразу в готову папку static
-UPLOAD_FOLDER = 'static'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -23,8 +21,7 @@ def get_connection():
     conn = _SHARED_CONN
     c = conn.cursor()
     
-    # Таблиця users (всього 7 колонок)
-    # Порядок: id(0), username(1), password(2), nickname(3), avatar(4), souls(5), last_result(6)
+    # Таблиця users: id(0), username(1), password(2), nickname(3), avatar(4), souls(5), last_result(6)
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -143,7 +140,7 @@ def guide():
             
             cost_per_hour = 20 if guide_type == 'basic' else 40
             total_cost = cost_per_hour * hours
-            service_title = f"Провідник {guide_type.upper()} ({hours} год.)"
+            service_title = f"Провідник {guide_type.upper()} ({hours} god.)"
             
             try:
                 dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
@@ -178,7 +175,6 @@ def admin():
         
     conn = get_connection()
     c = conn.cursor()
-    # Запитуємо всі колонки, щоб уникнути помилок індексів у шаблоні admin.html
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users")
     users = c.fetchall()
     
@@ -220,7 +216,6 @@ def register():
         if not username or not password:
             return "Будь ласка, заповніть логін та пароль!"
             
-        # Якщо нікнейм порожній — даємо значення юзернейму
         final_nickname = nickname if nickname and nickname.strip() != "" else username
             
         conn = get_connection()
@@ -268,30 +263,25 @@ def profile():
     
     if request.method == 'POST':
         try:
-            # 1. Оновлення нікнейму
             new_nickname = request.form.get('nickname')
             if new_nickname:
                 c.execute("UPDATE users SET nickname=? WHERE id=?", (new_nickname, session['user_id']))
                 conn.commit()
                 
-            # 2. Обробка файлу аватара
             if 'avatar' in request.files:
                 file = request.files['avatar']
                 if file and file.filename != '' and allowed_file(file.filename):
-                    ext = file.filename.rsplit('.', 1)[1].lower()
-                    # Робимо унікальне ім'я файлу на основі id користувача
-                    filename = secure_filename(f"avatar_{session['user_id']}.{ext}")
+                    # ФІКС: Конвертуємо файл в рядок Base64 замість збереження на диск
+                    file_bytes = file.read()
+                    encoded_string = base64.b64encode(file_bytes).decode('utf-8')
+                    mime_type = file.mimetype
+                    avatar_data = f"data:{mime_type};base64,{encoded_string}"
                     
-                    # Зберігаємо файл безпосередньо у папку static
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    
-                    # Оновлюємо назву аватара в базі даних
-                    c.execute("UPDATE users SET avatar=? WHERE id=?", (filename, session['user_id']))
+                    c.execute("UPDATE users SET avatar=? WHERE id=?", (avatar_data, session['user_id']))
                     conn.commit()
         except Exception as e:
             return f"Помилка при збереженні профілю: {e}", 500
             
-    # Отримуємо свіжі дані користувача для відображення
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users WHERE id=?", (session['user_id'],))
     user = c.fetchone()
     
@@ -299,7 +289,6 @@ def profile():
         session.clear()
         return redirect(url_for('login'))
     
-    # Отримуємо сервіси користувача
     c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id=?", (session['user_id'],))
     user_services = c.fetchall()
     
