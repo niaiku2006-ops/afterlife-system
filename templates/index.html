@@ -9,41 +9,54 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background: #0b0b0b;
+    /* Створюємо пекельний фоновий візерунок з Черепами, ТЦК та Черепашками-ніндзя */
+    background-color: #050505;
+    background-image: linear-gradient(rgba(11, 11, 11, 0.95), rgba(11, 11, 11, 0.95)), 
+                      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Ctext x='10' y='30' fill='%23222' font-size='22' font-family='Arial'%3E💀%3C/text%3E%3Ctext x='90' y='40' fill='%231d1a2f' font-weight='bold' font-size='18' font-family='sans-serif'%3ETЦK%3C/text%3E%3Ctext x='40' y='90' fill='%231a281a' font-size='22'%3E🐢🥷%3C/text%3E%3Ctext x='110' y='120' fill='%23222' font-size='24'%3E💀%3C/text%3E%3C/svg%3E");
     color: #e0e0e0;
     line-height: 1.6;
 }
 
 header {
-    background: #111;
-    padding: 30px 20px;
+    background: rgba(17, 17, 17, 0.9);
+    padding: 40px 20px;
     text-align: center;
-    border-bottom: 1px solid #333;
+    border-bottom: 2px solid #b3a1ff;
+    box-shadow: 0 4px 20px rgba(179, 161, 255, 0.1);
 }
 
 header h1 {
     margin: 0;
     color: #b3a1ff;
-    font-size: 36px;
+    font-size: 42px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(179, 161, 255, 0.5);
 }
 
 nav {
-    background: #151515;
-    padding: 12px;
+    background: rgba(21, 21, 21, 0.9);
+    padding: 15px;
     text-align: center;
     border-bottom: 1px solid #222;
+    backdrop-filter: blur(5px);
 }
 
 nav a {
-    color: #ffffff; /* Чистий білий колір для посилань */
-    margin: 0 15px;
+    color: #ffffff;
+    margin: 0 20px;
     text-decoration: none;
-    font-size: 16px;
-    transition: color 0.2s;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    padding: 5px 10px;
+    border-radius: 4px;
 }
 
 nav a:hover {
-    color: #b3a1ff;
+    color: #050505;
+    background: #b3a1ff;
+    box-shadow: 0 0 15px rgba(179, 161, 255, 0.6);
 }
 
 main {
@@ -53,21 +66,37 @@ main {
 }
 
 .section {
-    background: #1a1a1a;
-    padding: 25px;
-    margin-bottom: 25px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(179, 161, 255, 0.05);
+    background: rgba(26, 26, 26, 0.85);
+    padding: 30px;
+    margin-bottom: 35px;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+}
+
+.section:hover {
+    transform: translateY(-5px);
+    border-color: #b3a1ff;
 }
 
 h2 {
     margin-top: 0;
     color: #b3a1ff;
+    font-size: 24px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
 }
 
+/* ФІКС: Прибрали фіолетовий колір-посилання. Тепер це просто красивий акцентний білий текст */
 .highlight {
-    color: #b3a1ff;
+    color: #ffffff;
     font-weight: bold;
+    background: rgba(179, 161, 255, 0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(179, 161, 255, 0.3);
 }
 
 ul {
@@ -75,7 +104,18 @@ ul {
 }
 
 li {
-    margin-bottom: 8px;
+    margin-bottom: 12px;
+    position: relative;
+    list-style: none;
+}
+
+/* Кастомні маркери списку у вигляді маленьких черепків */
+li::before {
+    content: "💀";
+    position: absolute;
+    left: -25px;
+    top: 0;
+    font-size: 14px;
 }
 </style>
 </head>
@@ -113,7 +153,7 @@ li {
             На сайті використовується система <span class="highlight">душ</span> — це показник духовного розвитку.
         </p>
         <p>
-            Чим більше душ, тим більше можливостей відкриватися:
+            Чим більше душ, тим більше можливостей відкривається:
         </p>
         <ul>
             <li>доступ до додаткових сервісів</li>
