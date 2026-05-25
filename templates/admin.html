@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>Адмінка Бога</title>
+<title>Адмінка Boga 👁️</title>
 <style>
 body{ margin:0; font-family:Arial; background:#0b0b0b; color:white; }
 header{ background:#111; padding:20px; text-align:center; }
@@ -45,8 +45,10 @@ button:hover{ background:#9a87ff; }
     {% for u in users %}
     <div class="card user-card" id="user-{{ u[0] }}">
         <div class="user-head">
-            {% if u[4] %}
+            {% if u[4] and u[4] != 'default.png' and not u[4].startswith('data:') %}
                 <img src="/static/avatars/{{u[4]}}">
+            {% elif u[4] and u[4].startswith('data:') %}
+                <img src="{{u[4]}}">
             {% else %}
                 <img src="https://i.imgur.com/6VBx3io.png">
             {% endif %}
@@ -69,8 +71,8 @@ button:hover{ background:#9a87ff; }
             {% for s in active_services %}
                 {% if s[1] == u[0] %}
                     {% set ns.has_services = true %}
-                    <div class="service" data-date="{{ s[5].split(' ')[0] if s[5] else '' }}">
-                        <b>📅 {{ s[5] if s[5] else 'Час не вказано' }}</b> — {{ s[4] }}
+                    <div class="service" data-date="{{ s[4].split(' ')[0] if s[4] else '' }}">
+                        <b>📅 {{ s[4] if s[4] else 'Час не вказано' }}</b> — {{ s[2] }}
                         <a href="/use_service/{{ s[0] }}">
                             <button style="background: #222; border: 1px solid #444; float: right; margin-top: -5px;">Виконано</button>
                         </a>
@@ -89,18 +91,22 @@ button:hover{ background:#9a87ff; }
 
 <script>
 function filterByDate() {
-    const selectedDate = document.getElementById('admin-calendar').value;
+    const selectedDate = document.getElementById('admin-calendar').value; // Отримуємо РРРР-ММ-ДД
     if (!selectedDate) return;
 
     const parts = selectedDate.split('-');
-    const targetDateFormatted = `${parts[2]}.${parts[1]}.${parts[0]}`; // Перетворюємо у ДД.ММ.РРРР
+    const dotFormattedDate = `${parts[2]}.${parts[1]}.${parts[0]}`; // Перетворюємо у ДД.ММ.РРРР
 
     document.querySelectorAll('.user-card').forEach(card => {
         const services = card.querySelectorAll('.service');
         let hasActiveOnThisDay = false;
 
         services.forEach(service => {
-            if (service.getAttribute('data-date') === targetDateFormatted) {
+            const serviceDate = service.getAttribute('data-date'); 
+            if (!serviceDate) return;
+
+            // Перевіряємо збіг у будь-якому форматі (через дефіс чи крапку)
+            if (serviceDate === selectedDate || serviceDate === dotFormattedDate) {
                 service.classList.add('matched');
                 hasActiveOnThisDay = true;
             } else {
@@ -108,6 +114,7 @@ function filterByDate() {
             }
         });
 
+        // Ховаємо або показуємо грішника залежно від наявності справ на цю дату
         card.style.display = hasActiveOnThisDay ? 'block' : 'none';
     });
 }
