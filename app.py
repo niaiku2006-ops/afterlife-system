@@ -4,7 +4,6 @@ import base64
 import random
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, session, url_for
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "super-secret-key-afterlife-123")
@@ -14,15 +13,12 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Створюємо підключення до бази в пам'яті
 _SHARED_CONN = sqlite3.connect(":memory:", check_same_thread=False)
 
 def get_connection():
-    """Гарантовано створює правильну структуру таблиць у базі даних без тестових користувачів."""
     conn = _SHARED_CONN
     c = conn.cursor()
     
-    # Таблиця users: id(0), username(1), password(2), nickname(3), avatar(4), souls(5), last_result(6)
     c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +31,6 @@ def get_connection():
         )
     ''')
     
-    # Таблиця послуг
     c.execute('''
         CREATE TABLE IF NOT EXISTS services (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,7 +60,6 @@ def test():
     if 'user_id' not in session:
         return redirect(url_for('login'))
         
-    # Дізнаємося актуальний баланс душ користувача для відображення на сторінці тесту
     conn = get_connection()
     c = conn.cursor()
     c.execute("SELECT souls FROM users WHERE id=?", (session['user_id'],))
@@ -81,21 +75,18 @@ def save_test_result():
     
     user_id = session['user_id']
     result_text = request.form.get('result', 'Невідомий результат')
-    test_cost = 50  # Вартість проходження тесту
+    test_cost = 50
     
     try:
         conn = get_connection()
         c = conn.cursor()
         
-        # Перевіряємо, скільки душ є у грішника
         c.execute("SELECT souls FROM users WHERE id=?", (user_id,))
         row = c.fetchone()
         user_souls = row[0] if row else 0
         
-        # Перевірка на платоспроможність душ
         if user_souls >= test_cost:
             new_souls = user_souls - test_cost
-            # Знімаємо 50 душ і записуємо результат тесту
             c.execute("UPDATE users SET souls=?, last_result=? WHERE id=?", (new_souls, result_text, user_id))
             conn.commit()
             return f"Результат збережено! З вашого рахунку списано {test_cost} душ. 😈"
@@ -187,7 +178,6 @@ def guide():
             
     return render_template('guide.html')
 
-# --- ВИПРАВЛЕНИЙ РОУТ АДМІНКИ ---
 @app.route('/admin')
 def admin():
     if 'user_id' not in session or not session.get('admin'):
@@ -196,15 +186,12 @@ def admin():
     conn = get_connection()
     c = conn.cursor()
     
-    # 1. Отримуємо список усіх користувачів
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users")
     users = c.fetchall()
     
-    # 2. Отримуємо абсолютно ВСІ замовлення, які ще не були виконані (used = 0)
     c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE used=0")
     active_services = c.fetchall()
     
-    # Передаємо окремі списки, як того і вимагає наш новий HTML-шаблон
     return render_template('admin.html', users=users, active_services=active_services)
 
 @app.route('/give/<int:user_id>/<int:amount>')
@@ -238,8 +225,6 @@ def register():
             return "Будь ласка, заповніть логін та пароль!"
             
         final_nickname = nickname if nickname and nickname.strip() != "" else username
-            
-        # Рандомна кількість душ від 6 до 777
         random_souls = random.randint(6, 777)
             
         conn = get_connection()
@@ -269,7 +254,6 @@ def login():
             session['user_id'] = user[0]
             session['username'] = user[1]
             
-            # Перевірка на божественні права адміна (незалежно від регістру)
             if user[1].lower() in ['god', 'admin']:
                 session['admin'] = True
                 
