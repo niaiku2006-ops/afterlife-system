@@ -18,7 +18,7 @@ def allowed_file(filename):
 _SHARED_CONN = sqlite3.connect(":memory:", check_same_thread=False)
 
 def get_connection():
-    """Гарантовано створює правильну структуру таблиць у базі даних."""
+    """Гарантовано створює правильну структуру таблиць у базі даних без тестових користувачів."""
     conn = _SHARED_CONN
     c = conn.cursor()
     
@@ -46,11 +46,6 @@ def get_connection():
         )
     ''')
     
-    # Створюємо дефолтних користувачів, якщо база чиста
-    c.execute("SELECT COUNT(*) FROM users")
-    if c.fetchone()[0] == 0:
-        c.execute("INSERT INTO users (id, username, password, nickname, avatar, souls, last_result) VALUES (1, 'Admin', 'admin123', 'Адміністратор', 'default.png', 500, '')")
-        c.execute("INSERT INTO users (id, username, password, nickname, avatar, souls, last_result) VALUES (2, 'User', 'user123', 'Грішник', 'default.png', 100, '')")
     conn.commit()
     return conn
 
@@ -164,7 +159,7 @@ def guide():
             
             cost_per_hour = 20 if guide_type == 'basic' else 40
             total_cost = cost_per_hour * hours
-            service_title = f"Провідник {guide_type.upper()} ({hours} год.)"
+            service_title = f"Провідник {guide_type.upper()} ({hours} god.)"
             
             try:
                 dt = datetime.strptime(booking_time, "%Y-%m-%dT%H:%M")
@@ -192,7 +187,7 @@ def guide():
             
     return render_template('guide.html')
 
-# --- ОНОВЛЕНИЙ РОУТ АДМІНКИ ---
+# --- ВИПРАВЛЕНИЙ РОУТ АДМІНКИ ---
 @app.route('/admin')
 def admin():
     if 'user_id' not in session or not session.get('admin'):
@@ -201,7 +196,7 @@ def admin():
     conn = get_connection()
     c = conn.cursor()
     
-    # 1. Отримуємо список усіх грішників/користувачів
+    # 1. Отримуємо список усіх користувачів
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users")
     users = c.fetchall()
     
@@ -209,7 +204,7 @@ def admin():
     c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE used=0")
     active_services = c.fetchall()
     
-    # Передаємо окремі списки, як того і вимагає наш оновлений шаблон admin.html
+    # Передаємо окремі списки, як того і вимагає наш новий HTML-шаблон
     return render_template('admin.html', users=users, active_services=active_services)
 
 @app.route('/give/<int:user_id>/<int:amount>')
@@ -274,6 +269,7 @@ def login():
             session['user_id'] = user[0]
             session['username'] = user[1]
             
+            # Перевірка на божественні права адміна (незалежно від регістру)
             if user[1].lower() in ['god', 'admin']:
                 session['admin'] = True
                 
