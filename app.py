@@ -192,6 +192,7 @@ def guide():
             
     return render_template('guide.html')
 
+# --- ОНОВЛЕНИЙ РОУТ АДМІНКИ ---
 @app.route('/admin')
 def admin():
     if 'user_id' not in session or not session.get('admin'):
@@ -199,16 +200,17 @@ def admin():
         
     conn = get_connection()
     c = conn.cursor()
+    
+    # 1. Отримуємо список усіх грішників/користувачів
     c.execute("SELECT id, username, password, nickname, avatar, souls, last_result FROM users")
     users = c.fetchall()
     
-    users_data = []
-    for u in users:
-        c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE user_id=? AND used=0", (u[0],))
-        srv = c.fetchall()
-        users_data.append({'info': u, 'services': srv})
-        
-    return render_template('admin.html', users_data=users_data)
+    # 2. Отримуємо абсолютно ВСІ замовлення, які ще не були виконані (used = 0)
+    c.execute("SELECT id, user_id, name, used, booking_date FROM services WHERE used=0")
+    active_services = c.fetchall()
+    
+    # Передаємо окремі списки, як того і вимагає наш оновлений шаблон admin.html
+    return render_template('admin.html', users=users, active_services=active_services)
 
 @app.route('/give/<int:user_id>/<int:amount>')
 def give_souls(user_id, amount):
